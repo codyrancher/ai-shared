@@ -1,0 +1,11 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+
+# Node (in case helper scripts get added later)
+node_modules/
+
+# Scratch / local server artifacts
+.cache/
+*.log

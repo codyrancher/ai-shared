@@ -1,0 +1,25 @@
+# Prompt - Customizing behavior with CLAUDE.md
+
+Paste into Claude Code in the harness project.
+
+## Shape behavior
+
+```
+Add two rules to CLAUDE.md: never use em dashes in any output, and always run
+yarn lint before you tell me a change is done. Then show me the diff.
+```
+
+## Provision in-cluster on a keyword
+
+```
+Add a CLAUDE.md rule so that when I say "seed demo", you create a namespace called
+demo-app in the local cluster and populate it with a sample Deployment, Service,
+and ConfigMap using kubectl against the current kubeconfig. Then run it: seed demo.
+```
+
+## Notes
+
+- CLAUDE.md is loaded at the start of every session, so rules stick without re-prompting.
+- Keep rules imperative and testable ("always run X", "never do Y"), so you can see them take effect immediately.
+- The keyword-to-kubectl rule is the bridge into demo 5: once the agent can act on the cluster from a phrase, it can also provision the infrastructure around it.
+- See [`files/example-CLAUDE.md`](./files/example-CLAUDE.md) for a ready-to-adapt block.
