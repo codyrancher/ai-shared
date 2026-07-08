@@ -1,12 +1,13 @@
-# Prompt - Provisioning an OIDC provider outside the cluster
+# Provisioning resources outside the cluster (OIDC)
 
 Paste into Claude Code in the harness project.
 
+## Stand up and connect OIDC
+
+**Why:** Saves an afternoon of container, client, and auth-config wiring, and it verifies the login for you at the end.
+
 ```
-Stand up a Dex OIDC provider in a local container with an issuer reachable from the
-Rancher server. Create a static client for Rancher, then configure this Rancher
-instance to use that provider for auth, end to end. Walk me through each step, run
-the commands, and finish by logging in through the new provider to prove it works.
+Stand up a Dex OIDC provider in a local container with an issuer reachable from the Rancher server. Create a static client for Rancher, then configure this Rancher instance to use that provider for auth, end to end. Walk me through each step, run the commands, and finish by logging in through the new provider to prove it works.
 ```
 
 ## Notes

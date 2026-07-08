@@ -52,6 +52,69 @@
     document.body.removeChild(ta);
   }
 
+  // ---- markdown content loading + parsing --------------------------------
+  // Demo copy lives in each demo's README.md + prompt.md (the manifest only
+  // carries structure + media). We fetch those and pull a few anchors so the
+  // renderer below stays unchanged:
+  //   README.md : "**Why:**" line, "## What to look for" list, "## Skills & files" list
+  //   prompt.md : each "## <title>" -> { why (**Why:**), text (``` block), screenshot (![]) }
+  var mdCache = {};
+  var currentDemoId = null;
+
+  function mdSection(md, heading) {
+    var re = new RegExp('^##\\s+' + heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*$', 'm');
+    var m = re.exec(md);
+    if (!m) return '';
+    var rest = md.slice(m.index + m[0].length);
+    var next = rest.search(/^##\s+/m);
+    return next >= 0 ? rest.slice(0, next) : rest;
+  }
+  function mdBullets(block) {
+    return (block.match(/^-[ \t]+.+$/gm) || []).map(function (l) { return l.replace(/^-[ \t]+/, '').trim(); });
+  }
+  function parseReadme(md) {
+    var why = (md.match(/^\*\*Why:\*\*[ \t]*(.+)$/m) || [])[1] || '';
+    var skills = [], links = [];
+    mdBullets(mdSection(md, 'Skills & files')).forEach(function (item) {
+      var link = item.match(/\[`?([^`\]]+?)`?\]\(([^)]+)\)/);
+      if (link) links.push({ label: link[1], href: link[2] });
+      else { var sk = item.match(/`([^`]+)`/); if (sk) skills.push(sk[1]); }
+    });
+    return { why: why.trim(), lookFor: mdBullets(mdSection(md, 'What to look for')), skills: skills, links: links };
+  }
+  function parsePrompts(md) {
+    var re = /^##[ \t]+(.+?)[ \t]*$/gm, heads = [], m;
+    while ((m = re.exec(md))) heads.push({ title: m[1].trim(), lineStart: m.index, bodyStart: m.index + m[0].length });
+    var out = [];
+    for (var i = 0; i < heads.length; i++) {
+      if (/^notes$/i.test(heads[i].title)) continue;
+      var end = i + 1 < heads.length ? heads[i + 1].lineStart : md.length;
+      var body = md.slice(heads[i].bodyStart, end);
+      var code = body.match(/```[^\n]*\n([\s\S]*?)\n?```/);
+      var shot = body.match(/!\[([^\]]*)\]\(([^)]+)\)/);
+      out.push({
+        label: heads[i].title,
+        why: ((body.match(/^\*\*Why:\*\*[ \t]*(.+)$/m) || [])[1] || '').trim(),
+        text: code ? code[1].replace(/\s+$/, '') : '',
+        screenshot: shot ? { alt: shot[1], src: shot[2] } : null
+      });
+    }
+    return out;
+  }
+  function fetchText(url) {
+    return fetch(url).then(function (r) { return r.ok ? r.text() : ''; }).catch(function () { return ''; });
+  }
+  function loadDemoContent(demo) {
+    if (mdCache[demo.path]) return mdCache[demo.path];
+    var base = demo.path + '/';
+    var p = Promise.all([fetchText(base + 'README.md'), fetchText(base + 'prompt.md')]).then(function (res) {
+      var r = parseReadme(res[0]);
+      return { why: r.why, lookFor: r.lookFor, skills: r.skills, links: r.links, prompts: parsePrompts(res[1]) };
+    });
+    mdCache[demo.path] = p;
+    return p;
+  }
+
   // ---- flatten demos for routing + counts ---------------------------------
   var FLAT = [];
   P.sections.forEach(function (section) {
@@ -228,64 +291,68 @@
     return { mount: mount, open: open, close: close };
   })();
 
-  // ---- render a demo ------------------------------------------------------
+  // ---- render a demo (copy is fetched from its markdown) -----------------
   function renderDemo(entry) {
     var d = entry.demo, section = entry.section, group = entry.group;
+    currentDemoId = d.id;
     document.getElementById('tabName').textContent = d.title;
     var crumb = [section.title].concat(group.title ? [group.title] : []).concat([d.title]);
     document.getElementById('breadcrumbs').innerHTML = crumb
       .map(function (c) { return '<span>' + esc(c) + '</span>'; })
       .join('<span class="sep">›</span>');
 
-    var h = '';
-    h += '<div class="eyebrow">' + esc(section.title) + (group.title ? ' · ' + esc(group.title) : '') + '</div>';
-    h += '<h1 class="demo-title">' + esc(d.title) + '</h1>';
-    if (d.why) h += '<p class="why-lead">' + esc(d.why) + '</p>';
-
-    h += d.prompts.map(function (p, i) { return PromptBox(p, i, d.path); }).join('');
-
-    if (d.lookFor && d.lookFor.length) {
-      h += '<div class="section-h">What to look for</div>';
-      h += '<ul class="lookfor">' + d.lookFor.map(function (li) { return '<li>' + esc(li) + '</li>'; }).join('') + '</ul>';
-    }
-
-    h += '<div class="section-h">Result</div>';
-    h += '<div class="media-grid">' + (d.media && d.media.length
-      ? d.media.map(function (m) { return mediaCard(m, d.path); }).join('')
-      : '<div class="media-card"><div class="placeholder"><div>No media yet</div></div></div>') + '</div>';
-
-    // skills render as static chips; files link to the repo blob
-    var chips = (d.skills || []).map(function (s) { return '<span class="chip skill">✳ ' + esc(s) + '</span>'; });
-    (d.links || []).forEach(function (l) {
-      chips.push('<a class="chip file" target="_blank" rel="noopener" href="' + esc(blobUrl(d.path, l.href)) + '">▸ ' + esc(l.label) + '</a>');
-    });
-    chips.push('<a class="chip file" target="_blank" rel="noopener" href="' + esc(blobUrl(d.path, 'prompt.md')) + '">▸ prompt.md</a>');
-    chips.push('<a class="chip file" target="_blank" rel="noopener" href="' + esc(blobUrl(d.path, 'README.md')) + '">▸ README.md</a>');
-    if (chips.length) {
-      h += '<div class="section-h">Skills &amp; files</div>';
-      h += '<div class="chips">' + chips.join('') + '</div>';
-    }
-
-    h += '<div class="folder-link">Demo folder: <a target="_blank" rel="noopener" href="' + esc(treeUrl(d.path)) + '"><code>' + esc(d.path) + '</code></a></div>';
-
     var content = document.getElementById('content');
-    content.innerHTML = h;
+    content.innerHTML =
+      '<div class="eyebrow">' + esc(section.title) + (group.title ? ' · ' + esc(group.title) : '') + '</div>' +
+      '<h1 class="demo-title">' + esc(d.title) + '</h1>' +
+      '<div id="demo-body"><p class="loading">Loading…</p></div>';
     content.scrollTop = 0;
 
-    Array.prototype.forEach.call(content.querySelectorAll('.copy'), function (btn) {
-      btn.addEventListener('click', function () {
-        copyText(d.prompts[+btn.getAttribute('data-i')].text, btn);
+    loadDemoContent(d).then(function (c) {
+      if (currentDemoId !== d.id) return;               // navigated away mid-fetch
+      var body = document.getElementById('demo-body');
+      if (!body) return;
+      var h = '';
+      if (c.why) h += '<p class="why-lead">' + esc(c.why) + '</p>';
+      h += c.prompts.map(function (p, i) { return PromptBox(p, i, d.path); }).join('');
+
+      if (c.lookFor && c.lookFor.length) {
+        h += '<div class="section-h">What to look for</div>';
+        h += '<ul class="lookfor">' + c.lookFor.map(function (li) { return '<li>' + esc(li) + '</li>'; }).join('') + '</ul>';
+      }
+
+      h += '<div class="section-h">Result</div>';
+      h += '<div class="media-grid">' + (d.media && d.media.length
+        ? d.media.map(function (m) { return mediaCard(m, d.path); }).join('')
+        : '<div class="media-card"><div class="placeholder"><div>No media yet</div></div></div>') + '</div>';
+
+      var chips = (c.skills || []).map(function (s) { return '<span class="chip skill">✳ ' + esc(s) + '</span>'; });
+      (c.links || []).forEach(function (l) {
+        chips.push('<a class="chip file" target="_blank" rel="noopener" href="' + esc(blobUrl(d.path, l.href)) + '">▸ ' + esc(l.label) + '</a>');
       });
-    });
-    Array.prototype.forEach.call(content.querySelectorAll('.prompt-thumb'), function (btn) {
-      btn.addEventListener('click', function () {
-        ImageModal.open(btn.getAttribute('data-src'), btn.getAttribute('data-alt'));
+      chips.push('<a class="chip file" target="_blank" rel="noopener" href="' + esc(blobUrl(d.path, 'prompt.md')) + '">▸ prompt.md</a>');
+      chips.push('<a class="chip file" target="_blank" rel="noopener" href="' + esc(blobUrl(d.path, 'README.md')) + '">▸ README.md</a>');
+      h += '<div class="section-h">Skills &amp; files</div><div class="chips">' + chips.join('') + '</div>';
+
+      h += '<div class="folder-link">Demo folder: <a target="_blank" rel="noopener" href="' + esc(treeUrl(d.path)) + '"><code>' + esc(d.path) + '</code></a></div>';
+
+      body.innerHTML = h;
+      Array.prototype.forEach.call(body.querySelectorAll('.copy'), function (btn) {
+        btn.addEventListener('click', function () { copyText(c.prompts[+btn.getAttribute('data-i')].text, btn); });
       });
+      Array.prototype.forEach.call(body.querySelectorAll('.prompt-thumb'), function (btn) {
+        btn.addEventListener('click', function () { ImageModal.open(btn.getAttribute('data-src'), btn.getAttribute('data-alt')); });
+      });
+    }).catch(function () {
+      if (currentDemoId !== d.id) return;
+      var body = document.getElementById('demo-body');
+      if (body) body.innerHTML = '<p class="loading">Could not load this demo. Serve the site over http (a local server or GitHub Pages); opening index.html via file:// blocks fetch.</p>';
     });
   }
 
   // ---- render overview ----------------------------------------------------
   function renderOverview() {
+    currentDemoId = null;
     document.getElementById('tabName').textContent = 'Overview';
     document.getElementById('breadcrumbs').innerHTML = '<span>' + esc(P.title) + '</span>';
     var total = FLAT.length;

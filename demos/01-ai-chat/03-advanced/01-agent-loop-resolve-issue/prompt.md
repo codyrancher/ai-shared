@@ -1,14 +1,13 @@
-# Prompt - An agent that loops on itself to resolve an issue
+# An agent that loops on itself to resolve an issue
 
 Paste into Claude Code in the harness project.
 
+## Close the loop
+
+**Why:** Runs the reproduce, fix, and verify loop unattended, so you are not driving every step by hand.
+
 ```
-Work issue #<N> end to end and do not stop until it is green. Loop: reproduce it
-against the live Rancher and record a before video, find and apply the fix, verify
-the repro no longer happens and record an after video, run yarn lint and the
-relevant tests, and if anything fails go back and fix it. When it is all passing,
-commit on a branch named issue-<N> using the my-commit-create skill. Re-read your
-own diff and the issue before you call it done.
+Work issue #<N> end to end and do not stop until it is green. Loop: reproduce it against the live Rancher and record a before video, find and apply the fix, verify the repro no longer happens and record an after video, run yarn lint and the relevant tests, and if anything fails go back and fix it. When it is all passing, commit on a branch named issue-<N> using the my-commit-create skill. Re-read your own diff and the issue before you call it done.
 ```
 
 ## Notes

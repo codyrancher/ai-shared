@@ -1,12 +1,13 @@
-# Definition - Stale bot
+# Stale bot
 
 Scheduled cloud agent (routine).
 
+## The definition
+
+**Why:** A few lines run daily on their own, saving a recurring manual chore forever.
+
 ```
-/schedule daily at 08:00: Find open issues in rancher/dashboard with no activity in
-90 days and no milestone or assignee. Post the standard stale warning. If an
-already-warned issue has been silent another 14 days, close it as stale with a short
-explanation and the stale label. Skip anything labeled keep or security.
+/schedule daily at 08:00: Find open issues in rancher/dashboard with no activity in 90 days and no milestone or assignee. Post the standard stale warning. If an already-warned issue has been silent another 14 days, close it as stale with a short explanation and the stale label. Skip anything labeled keep or security.
 ```
 
 ## Notes

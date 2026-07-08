@@ -1,12 +1,13 @@
-# Prompt - Querying the codebase for a linked report
+# Querying the codebase for a linked report
 
 Paste into Claude Code in the harness project.
 
+## Orientation report
+
+**Why:** Skips the manual code spelunking. You get a verifiable map with file:line links instead of reading the whole subsystem yourself.
+
 ```
-Give me a short orientation report on how cluster provisioning is wired in this
-dashboard. Cover: the route and entry component, the store modules involved, and
-where the create/update API calls are made. Every claim must link to an exact file
-and line. Cap it at 15 bullets and end with the 3 files I should read first.
+Give me a short orientation report on how cluster provisioning is wired in this dashboard. Cover: the route and entry component, the store modules involved, and where the create/update API calls are made. Every claim must link to an exact file and line. Cap it at 15 bullets and end with the 3 files I should read first.
 ```
 
 ## Notes

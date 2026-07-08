@@ -1,20 +1,21 @@
-# Prompt - Customizing behavior with CLAUDE.md
+# Customizing behavior with CLAUDE.md
 
 Paste into Claude Code in the harness project.
 
 ## Shape behavior
 
+**Why:** Never type "run lint first" or "no em dashes" again. Set it once and every reply obeys.
+
 ```
-Add two rules to CLAUDE.md: never use em dashes in any output, and always run
-yarn lint before you tell me a change is done. Then show me the diff.
+Add two rules to CLAUDE.md: never use em dashes in any output, and always run yarn lint before you tell me a change is done. Then show me the diff.
 ```
 
 ## Provision in-cluster on a keyword
 
+**Why:** Collapses a multi-step kubectl runbook into a single word you can rerun anytime.
+
 ```
-Add a CLAUDE.md rule so that when I say "seed demo", you create a namespace called
-demo-app in the local cluster and populate it with a sample Deployment, Service,
-and ConfigMap using kubectl against the current kubeconfig. Then run it: seed demo.
+Add a CLAUDE.md rule so that when I say "seed demo", you create a namespace called demo-app in the local cluster and populate it with a sample Deployment, Service, and ConfigMap using kubectl against the current kubeconfig. Then run it: seed demo.
 ```
 
 ## Notes

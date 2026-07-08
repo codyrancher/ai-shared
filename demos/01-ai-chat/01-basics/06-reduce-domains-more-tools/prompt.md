@@ -1,13 +1,13 @@
-# Prompt - Reduce active domains, hand the agent a toolbelt
+# Reduce active domains, hand the agent a toolbelt
 
 Paste into Claude Code in the harness project.
 
+## Point at the toolbelt
+
+**Why:** The agent does the browser, Rancher, and GitHub steps itself instead of handing each one back to you.
+
 ```
-Here is the toolbelt for this project: browser.mjs for screenshots and video,
-wait-for-sidecars before any browser or Rancher work, the insights curl for
-reporting missing tools, and the my-* skills for commits, PRs, and recordings.
-Whenever a task needs the browser, Rancher, or GitHub, reach for these instead of
-asking me to do it by hand. If a tool you need is missing, tell me and I will add it.
+Here is the toolbelt for this project: browser.mjs for screenshots and video, wait-for-sidecars before any browser or Rancher work, the insights curl for reporting missing tools, and the my-* skills for commits, PRs, and recordings. Whenever a task needs the browser, Rancher, or GitHub, reach for these instead of asking me to do it by hand. If a tool you need is missing, tell me and I will add it.
 ```
 
 ## Notes

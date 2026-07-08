@@ -1,13 +1,13 @@
-# Prompt - /loop over the whole issue backlog
+# /loop over the whole issue backlog
 
 Paste into Claude Code in the harness project.
 
+## The /loop prompt
+
+**Why:** Turns hours of manual reading into a ranked report of duplicates and hotspots.
+
 ```
-/loop Fetch every open issue in rancher/dashboard via gh. Each iteration, take the
-next batch on a fresh context and build up two things: clusters of duplicate or
-near-duplicate issues, and a heatmap of which files or areas the issues point at.
-Append results to issues-report.md as you go, never overwrite. Stop when all issues
-are processed, then print the top 10 hotspots and the largest duplicate clusters.
+/loop Fetch every open issue in rancher/dashboard via gh. Each iteration, take the next batch on a fresh context and build up two things: clusters of duplicate or near-duplicate issues, and a heatmap of which files or areas the issues point at. Append results to issues-report.md as you go, never overwrite. Stop when all issues are processed, then print the top 10 hotspots and the largest duplicate clusters.
 ```
 
 ## Notes

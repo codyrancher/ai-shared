@@ -1,14 +1,13 @@
-# Prompt - Pipelines and workflows from prompts alone (zero code)
+# Pipelines and workflows from prompts alone (zero code)
 
 Paste into Claude Code in the harness project.
 
+## Describe the pipeline
+
+**Why:** Fan-out, verification, and synthesis from a paragraph, so you skip building and maintaining the harness.
+
 ```
-Build me a review pipeline with no code, just orchestration. Stage 1: three agents
-each read the current diff for a different concern (correctness, accessibility,
-performance) and return findings as JSON. Stage 2: for each finding, spawn a skeptic
-agent that tries to refute it, and drop anything a majority refutes. Stage 3:
-synthesize the survivors into a single ranked review. Run it on the current branch
-and show me the survivors.
+Build me a review pipeline with no code, just orchestration. Stage 1: three agents each read the current diff for a different concern (correctness, accessibility, performance) and return findings as JSON. Stage 2: for each finding, spawn a skeptic agent that tries to refute it, and drop anything a majority refutes. Stage 3: synthesize the survivors into a single ranked review. Run it on the current branch and show me the survivors.
 ```
 
 ## Notes

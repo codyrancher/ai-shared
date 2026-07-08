@@ -1,25 +1,8 @@
-# 3. Pipelines and workflows from prompts alone (zero code)
+# Pipelines and workflows from prompts alone (zero code)
 
-> **AI Chat › Advanced** in the [AI Presentation](../../../../README.md)
+> **AI Chat > Advanced** demo in [AI Shared](../../../../README.md).
 
-**Goal:** Describe a multi-stage, multi-agent pipeline in plain language and have it run, no code written.
-
-## The idea
-
-You can specify fan-out, verification, and synthesis as prose and the agent orchestrates it. Here: three reviewers each take one concern, a skeptic tries to refute every finding, and the survivors get synthesized into one ranked review. No script, just the shape of the pipeline described well.
-
-## Prompt
-
-```
-Build me a review pipeline with no code, just orchestration. Stage 1: three agents
-each read the current diff for a different concern (correctness, accessibility,
-performance) and return findings as JSON. Stage 2: for each finding, spawn a skeptic
-agent that tries to refute it, and drop anything a majority refutes. Stage 3:
-synthesize the survivors into a single ranked review. Run it on the current branch
-and show me the survivors.
-```
-
-Full prompt text: [`prompt.md`](./prompt.md) · Annotated version: [`files/pipeline-prompt.md`](./files/pipeline-prompt.md)
+**Why:** Get a multi-agent workflow without writing or maintaining any pipeline code.
 
 ## What to look for
 
@@ -27,11 +10,14 @@ Full prompt text: [`prompt.md`](./prompt.md) · Annotated version: [`files/pipel
 - Refuted findings get dropped before they reach you.
 - No pipeline code exists, yet it runs like one.
 
-## Result
+## Prompts
 
-_Media pending. Screenshot the pipeline running with `browser.mjs screenshot`; save at [`media/pipeline.png`](./media/)._
+See [`prompt.md`](./prompt.md).
 
 ## Skills & files
 
-- Annotated version: [`files/pipeline-prompt.md`](./files/pipeline-prompt.md)
-- Capture: `browser.mjs screenshot`
+- [`pipeline-prompt.md`](files/pipeline-prompt.md)
+
+## Result
+
+- _Pending:_ A prompt-defined review pipeline running (capture with `browser.mjs screenshot`), save as `media/pipeline.png`

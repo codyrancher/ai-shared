@@ -1,12 +1,15 @@
-# Prompt - Asking why something was implemented a certain way
+# Asking why something was implemented a certain way
 
 Paste into Claude Code in the harness project.
 
+## Recover the reasoning
+
+**Why:** Saves the archaeology across history and threads, and tells you whether a workaround is now obsolete.
+
 ```
-Why is <this function / component / workaround> written the way it is? Check git
-blame, the PR that introduced it, any linked issue, and nearby comments, then
-explain the reasoning in a few sentences. If it looks like a workaround, tell me
-exactly what it works around and whether that constraint still holds today.
+Why is <this function / component / workaround> written the way it is? Check git blame, the PR that introduced it, any linked issue, and nearby comments, then explain the reasoning in a few sentences. If it looks like a workaround, tell me exactly what it works around and whether that constraint still holds today.
+
+(Swap the target for a real one, e.g. "why does the Steve proxy rewrite the Host header before forwarding".)
 ```
 
 ## Notes

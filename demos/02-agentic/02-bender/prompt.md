@@ -1,29 +1,17 @@
-# Walkthrough - Bender (local pipeline / workflow)
+# Bender (local pipeline / workflow)
 
 This demo is a live tour of the pipeline, not a single paste-in prompt.
 
-## The five beats
+## What to show (walkthrough, not a single prompt)
+
+**Why:** Fresh-context retries and single-stage restarts save you from nursing a poisoned run all the way to the end.
 
 ```
-1. Motivation
-   Solve issues end to end, and harvest reusable prompts/skills for the team as a
-   side effect of every run.
-
-2. Iterate on fresh context
-   When a prompt goes sideways, retry it on a clean context instead of trying to
-   argue the agent out of a poisoned one. Fresh beats salvage.
-
-3. Interrogation tools (pre-existing run)
-   Open a completed run and inspect it stage by stage: the inputs, the outputs, and
-   the state each stage produced.
-
-4. Live tools (new run)
-   Start a run and open one of the live views: the browser sidecar or the streaming
-   logs, while the run is still in flight.
-
-5. Restart a stage
-   Re-run a single stage without redoing the whole pipeline, so a late failure does
-   not cost you the earlier work.
+1. The motivation: solve issues e2e, and harvest reusable prompts/skills for the team.
+2. Iterate and retry prompts on fresh context instead of fighting a poisoned one.
+3. The interrogation tools on a pre-existing run (inspect inputs, outputs, and state per stage).
+4. Start a run and open a live tool: the browser view or the streaming logs.
+5. Restart a single stage without rerunning the whole pipeline.
 ```
 
 ## Notes

@@ -1,22 +1,21 @@
-# Prompt - Screenshots, videos, and browser control from the CLI
+# Screenshots, videos, and browser control from the CLI
 
 Paste into Claude Code in the harness project.
 
 ## Record a before video
 
+**Why:** Saves the manual click-and-screen-record loop, and hands the next person a ready-made repro instead of a vague description.
+
 ```
-Reproduce issue #<N> against the live Rancher and record a before video. Use the
-my-browser-record-video skill: iterate to find the exact click sequence, save it as
-a Playwright script, then play it back with browser.mjs record-script so the
-recording is one clean take.
+Reproduce issue #<N> against the live Rancher and record a before video. Use the my-browser-record-video skill: iterate to find the exact click sequence, save it as a Playwright script, then play it back with browser.mjs record-script so the recording is one clean take.
 ```
 
 ## Labeled before/after comparison
 
+**Why:** No manual before/after cropping or arrow-drawing; the changed element is boxed for you.
+
 ```
-Take a labeled before/after comparison screenshot of the affected page with
-my-browser-screenshot-comparison, master versus this branch, and draw a red box
-around the element that changed.
+Take a labeled before/after comparison screenshot of the affected page with my-browser-screenshot-comparison, master versus this branch, and draw a red box around the element that changed.
 ```
 
 ## Notes
