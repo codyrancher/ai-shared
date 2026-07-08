@@ -72,7 +72,19 @@
   function mdBullets(block) {
     return (block.match(/^-[ \t]+.+$/gm) || []).map(function (l) { return l.replace(/^-[ \t]+/, '').trim(); });
   }
+  function parseMedia(md) {
+    return mdBullets(mdSection(md, 'Result')).map(function (item) {
+      var src = (item.match(/`([^`]+)`/) || [])[1] || '';
+      var pend = item.match(/\(pending:\s*([^)]+)\)/i);
+      var caption = item.replace(/`[^`]+`/, '').replace(/\(pending:[^)]*\)/i, '').replace(/^[\s-]+/, '').trim();
+      return {
+        type: /\.(webm|mp4|mov|m4v)$/i.test(src) ? 'video' : 'image',
+        src: src, caption: caption, pending: !!pend, captureWith: pend ? pend[1].trim() : undefined
+      };
+    }).filter(function (m) { return m.src; });
+  }
   function parseReadme(md) {
+    var title = (md.match(/^#[ \t]+(.+?)[ \t]*$/m) || [])[1] || '';
     var why = (md.match(/^\*\*Why:\*\*[ \t]*(.+)$/m) || [])[1] || '';
     var skills = [], links = [];
     mdBullets(mdSection(md, 'Skills & files')).forEach(function (item) {
@@ -80,14 +92,21 @@
       if (link) links.push({ label: link[1], href: link[2] });
       else { var sk = item.match(/`([^`]+)`/); if (sk) skills.push(sk[1]); }
     });
-    return { why: why.trim(), lookFor: mdBullets(mdSection(md, 'What to look for')), skills: skills, links: links };
+    return {
+      title: title.trim(), why: why.trim(),
+      lookFor: mdBullets(mdSection(md, 'What to look for')),
+      skills: skills, links: links, media: parseMedia(md)
+    };
   }
+  // A demo's README holds both copy and prompts. Every `## heading` is a prompt
+  // except these reserved section names.
+  var RESERVED = { 'what to look for': 1, 'skills & files': 1, 'result': 1, 'notes': 1 };
   function parsePrompts(md) {
     var re = /^##[ \t]+(.+?)[ \t]*$/gm, heads = [], m;
     while ((m = re.exec(md))) heads.push({ title: m[1].trim(), lineStart: m.index, bodyStart: m.index + m[0].length });
     var out = [];
     for (var i = 0; i < heads.length; i++) {
-      if (/^notes$/i.test(heads[i].title)) continue;
+      if (RESERVED[heads[i].title.toLowerCase()]) continue;
       var end = i + 1 < heads.length ? heads[i + 1].lineStart : md.length;
       var body = md.slice(heads[i].bodyStart, end);
       var code = body.match(/```[^\n]*\n([\s\S]*?)\n?```/);
@@ -106,20 +125,36 @@
   }
   function loadDemoContent(demo) {
     if (mdCache[demo.path]) return mdCache[demo.path];
-    var base = demo.path + '/';
-    var p = Promise.all([fetchText(base + 'README.md'), fetchText(base + 'prompt.md')]).then(function (res) {
-      var r = parseReadme(res[0]);
-      return { why: r.why, lookFor: r.lookFor, skills: r.skills, links: r.links, prompts: parsePrompts(res[1]) };
+    var p = fetchText(demo.path + '/README.md').then(function (md) {
+      var r = parseReadme(md);
+      return { title: r.title, why: r.why, lookFor: r.lookFor, skills: r.skills, links: r.links, media: r.media, prompts: parsePrompts(md) };
     });
     mdCache[demo.path] = p;
     return p;
   }
 
+  // id/n derived from the folder path; title/media/copy come from the markdown.
+  function deriveId(path) { return path.split('/').pop().replace(/^\d+[-_]?/, ''); }
+  function deriveN(path, i) { var m = path.split('/').pop().match(/^(\d+)/); return m ? parseInt(m[1], 10) : i + 1; }
+
+  var contentById = {};
+  function prefetchAll() {
+    return Promise.all(FLAT.map(function (f) {
+      return loadDemoContent(f.demo).then(
+        function (c) { contentById[f.demo.id] = c; },
+        function () { contentById[f.demo.id] = null; }
+      );
+    }));
+  }
+  function demoTitle(demo) { var c = contentById[demo.id]; return (c && c.title) || demo.id; }
+
   // ---- flatten demos for routing + counts ---------------------------------
   var FLAT = [];
   P.sections.forEach(function (section) {
     section.groups.forEach(function (group) {
-      group.demos.forEach(function (demo) {
+      group.demos.forEach(function (path, i) {
+        var demo = { path: path, id: deriveId(path), n: deriveN(path, i) };
+        group.demos[i] = demo; // replace the path string with the derived object
         FLAT.push({ demo: demo, section: section, group: group });
       });
     });
@@ -142,7 +177,7 @@
         group.demos.forEach(function (demo) {
           h += row(demo.id, deep ? 'lvl2' : 'lvl1',
             '<span class="dot">✳</span><span class="n">' + demo.n + '</span>',
-            demo.title, activeId === demo.id);
+            demoTitle(demo), activeId === demo.id);
         });
       });
     });
@@ -291,62 +326,52 @@
     return { mount: mount, open: open, close: close };
   })();
 
-  // ---- render a demo (copy is fetched from its markdown) -----------------
+  // ---- render a demo (copy comes from its prefetched markdown) -----------
   function renderDemo(entry) {
     var d = entry.demo, section = entry.section, group = entry.group;
-    currentDemoId = d.id;
-    document.getElementById('tabName').textContent = d.title;
-    var crumb = [section.title].concat(group.title ? [group.title] : []).concat([d.title]);
+    var c = contentById[d.id] || {};
+    var title = c.title || d.id;
+    document.getElementById('tabName').textContent = title;
+    var crumb = [section.title].concat(group.title ? [group.title] : []).concat([title]);
     document.getElementById('breadcrumbs').innerHTML = crumb
-      .map(function (c) { return '<span>' + esc(c) + '</span>'; })
+      .map(function (x) { return '<span>' + esc(x) + '</span>'; })
       .join('<span class="sep">›</span>');
 
+    var h = '';
+    h += '<div class="eyebrow">' + esc(section.title) + (group.title ? ' · ' + esc(group.title) : '') + '</div>';
+    h += '<h1 class="demo-title">' + esc(title) + '</h1>';
+    if (c.why) h += '<p class="why-lead">' + esc(c.why) + '</p>';
+    h += (c.prompts || []).map(function (p, i) { return PromptBox(p, i, d.path); }).join('');
+
+    if (c.lookFor && c.lookFor.length) {
+      h += '<div class="section-h">What to look for</div>';
+      h += '<ul class="lookfor">' + c.lookFor.map(function (li) { return '<li>' + esc(li) + '</li>'; }).join('') + '</ul>';
+    }
+
+    h += '<div class="section-h">Result</div>';
+    var media = c.media || [];
+    h += '<div class="media-grid">' + (media.length
+      ? media.map(function (m) { return mediaCard(m, d.path); }).join('')
+      : '<div class="media-card"><div class="placeholder"><div>No media yet</div></div></div>') + '</div>';
+
+    var chips = (c.skills || []).map(function (s) { return '<span class="chip skill">✳ ' + esc(s) + '</span>'; });
+    (c.links || []).forEach(function (l) {
+      chips.push('<a class="chip file" target="_blank" rel="noopener" href="' + esc(blobUrl(d.path, l.href)) + '">▸ ' + esc(l.label) + '</a>');
+    });
+    chips.push('<a class="chip file" target="_blank" rel="noopener" href="' + esc(blobUrl(d.path, 'README.md')) + '">▸ README.md</a>');
+    h += '<div class="section-h">Skills &amp; files</div><div class="chips">' + chips.join('') + '</div>';
+
+    h += '<div class="folder-link">Demo folder: <a target="_blank" rel="noopener" href="' + esc(treeUrl(d.path)) + '"><code>' + esc(d.path) + '</code></a></div>';
+
     var content = document.getElementById('content');
-    content.innerHTML =
-      '<div class="eyebrow">' + esc(section.title) + (group.title ? ' · ' + esc(group.title) : '') + '</div>' +
-      '<h1 class="demo-title">' + esc(d.title) + '</h1>' +
-      '<div id="demo-body"><p class="loading">Loading…</p></div>';
+    content.innerHTML = h;
     content.scrollTop = 0;
 
-    loadDemoContent(d).then(function (c) {
-      if (currentDemoId !== d.id) return;               // navigated away mid-fetch
-      var body = document.getElementById('demo-body');
-      if (!body) return;
-      var h = '';
-      if (c.why) h += '<p class="why-lead">' + esc(c.why) + '</p>';
-      h += c.prompts.map(function (p, i) { return PromptBox(p, i, d.path); }).join('');
-
-      if (c.lookFor && c.lookFor.length) {
-        h += '<div class="section-h">What to look for</div>';
-        h += '<ul class="lookfor">' + c.lookFor.map(function (li) { return '<li>' + esc(li) + '</li>'; }).join('') + '</ul>';
-      }
-
-      h += '<div class="section-h">Result</div>';
-      h += '<div class="media-grid">' + (d.media && d.media.length
-        ? d.media.map(function (m) { return mediaCard(m, d.path); }).join('')
-        : '<div class="media-card"><div class="placeholder"><div>No media yet</div></div></div>') + '</div>';
-
-      var chips = (c.skills || []).map(function (s) { return '<span class="chip skill">✳ ' + esc(s) + '</span>'; });
-      (c.links || []).forEach(function (l) {
-        chips.push('<a class="chip file" target="_blank" rel="noopener" href="' + esc(blobUrl(d.path, l.href)) + '">▸ ' + esc(l.label) + '</a>');
-      });
-      chips.push('<a class="chip file" target="_blank" rel="noopener" href="' + esc(blobUrl(d.path, 'prompt.md')) + '">▸ prompt.md</a>');
-      chips.push('<a class="chip file" target="_blank" rel="noopener" href="' + esc(blobUrl(d.path, 'README.md')) + '">▸ README.md</a>');
-      h += '<div class="section-h">Skills &amp; files</div><div class="chips">' + chips.join('') + '</div>';
-
-      h += '<div class="folder-link">Demo folder: <a target="_blank" rel="noopener" href="' + esc(treeUrl(d.path)) + '"><code>' + esc(d.path) + '</code></a></div>';
-
-      body.innerHTML = h;
-      Array.prototype.forEach.call(body.querySelectorAll('.copy'), function (btn) {
-        btn.addEventListener('click', function () { copyText(c.prompts[+btn.getAttribute('data-i')].text, btn); });
-      });
-      Array.prototype.forEach.call(body.querySelectorAll('.prompt-thumb'), function (btn) {
-        btn.addEventListener('click', function () { ImageModal.open(btn.getAttribute('data-src'), btn.getAttribute('data-alt')); });
-      });
-    }).catch(function () {
-      if (currentDemoId !== d.id) return;
-      var body = document.getElementById('demo-body');
-      if (body) body.innerHTML = '<p class="loading">Could not load this demo. Serve the site over http (a local server or GitHub Pages); opening index.html via file:// blocks fetch.</p>';
+    Array.prototype.forEach.call(content.querySelectorAll('.copy'), function (btn) {
+      btn.addEventListener('click', function () { copyText((c.prompts || [])[+btn.getAttribute('data-i')].text, btn); });
+    });
+    Array.prototype.forEach.call(content.querySelectorAll('.prompt-thumb'), function (btn) {
+      btn.addEventListener('click', function () { ImageModal.open(btn.getAttribute('data-src'), btn.getAttribute('data-alt')); });
     });
   }
 
@@ -406,7 +431,9 @@
     });
     ImageModal.mount();
     window.addEventListener('hashchange', route);
-    route();
+    document.getElementById('tree').innerHTML = '<div class="loading" style="padding:12px 16px">Loading…</div>';
+    document.getElementById('content').innerHTML = '<p class="loading">Loading demos…</p>';
+    prefetchAll().then(route);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
