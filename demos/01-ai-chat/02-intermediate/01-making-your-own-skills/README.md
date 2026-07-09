@@ -12,6 +12,8 @@
 I keep repeating this task: turn a GitHub issue thread into a tight reproduction plus a proposed fix. Turn it into a reusable skill. Create .claude/skills/summarize-issue/SKILL.md with YAML frontmatter (name, and a description that says when to use it) and a concise step-by-step playbook. Match the voice and structure of my existing my-* skills.
 ```
 
+**Result:** [example result](files/result.md)
+
 ## What to look for
 
 - Frontmatter description is written as a trigger ("use when..."), so discovery works.

@@ -278,6 +278,44 @@ h1.demo-title { font-size: 30px; line-height: 1.15; margin: 0 0 14px; color: var
 }
 .claude-box .cb-foot .hint { color: var(--text-dim); font-size: 12px; }
 
+/* Claude reply bubble (captured demo result rendered from markdown) */
+.claude-reply {
+  margin-top: 12px;
+  background: var(--claude-surface-2);
+  border: 1px solid var(--claude-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.claude-reply .cr-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-bottom: 1px solid var(--claude-border);
+  background: linear-gradient(180deg, #d977570d, transparent);
+}
+.claude-reply .cr-head .spark { width: 20px; height: 20px; flex: none; }
+.claude-reply .cr-head .who { color: var(--claude-coral); font-weight: 600; font-size: 13px; }
+.claude-reply .cr-tag {
+  margin-left: auto; font-size: 11px; color: var(--text-dim);
+  border: 1px solid var(--border-2); border-radius: 999px; padding: 2px 9px;
+}
+.cr-body { padding: 6px 18px 16px; font-size: 14px; line-height: 1.6; color: #d7d3cc; }
+.cr-body > :first-child { margin-top: 8px; }
+.cr-body h3, .cr-body h4, .cr-body h5, .cr-body h6 { color: var(--text-bright); margin: 18px 0 8px; font-size: 14px; font-weight: 650; }
+.cr-body h3 { font-size: 17px; margin-top: 4px; }
+.cr-body h4 { font-size: 15px; }
+.cr-body p { margin: 10px 0; }
+.cr-body ul, .cr-body ol { margin: 10px 0; padding-left: 22px; }
+.cr-body li { margin: 4px 0; }
+.cr-body a { color: var(--cyan); }
+.cr-body strong { color: var(--text); }
+.cr-body em { color: #c9c4bd; }
+.cr-body code { font-family: var(--mono); font-size: 12.5px; background: #00000045; padding: 1px 5px; border-radius: 4px; color: var(--string); }
+.cr-body pre { background: #1b1b1a; border: 1px solid var(--claude-border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; margin: 12px 0; }
+.cr-body pre code { background: none; padding: 0; color: #e7e3dd; font-size: 12.5px; line-height: 1.55; }
+.cr-body blockquote { border-left: 3px solid var(--claude-border); margin: 12px 0; padding: 2px 0 2px 14px; color: var(--text-dim); }
+.cr-body table { border-collapse: collapse; margin: 12px 0; font-size: 13px; display: block; overflow-x: auto; max-width: 100%; }
+.cr-body th, .cr-body td { border: 1px solid var(--border-2); padding: 6px 11px; text-align: left; white-space: nowrap; }
+.cr-body th { background: #ffffff08; color: var(--text); font-weight: 600; }
+
 /* ---- Look-for list ---- */
 ul.lookfor { list-style: none; padding: 0; margin: 0; }
 ul.lookfor li {

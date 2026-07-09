@@ -43,6 +43,8 @@ renders its demos directly under the section.
   - `**Why:** <text>` -> per-prompt line
   - first fenced code block -> the prompt text (copyable)
   - optional `![alt](media/x.png)` -> screenshot thumbnail (opens the modal)
+  - optional `**Result:** [label](files/result.md)` -> renders that markdown file as a
+    "Claude" reply bubble under the prompt (a captured example result)
 - **Reserved `##` sections** (parsed by name, never treated as prompts):
   - `## What to look for` -> `-` bullets become look-for items.
   - `## Skills & files` -> `-` bullets: `` `name` `` -> skill chip; `` [`label`](href) ``

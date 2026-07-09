@@ -12,6 +12,8 @@
 /loop Fetch every open issue in rancher/dashboard via gh. Each iteration, take the next batch on a fresh context and build up two things: clusters of duplicate or near-duplicate issues, and a heatmap of which files or areas the issues point at. Append results to issues-report.md as you go, never overwrite. Stop when all issues are processed, then print the top 10 hotspots and the largest duplicate clusters.
 ```
 
+**Result:** [example result](files/result.md)
+
 ## What to look for
 
 - Fresh context each iteration keeps late batches as sharp as the first.

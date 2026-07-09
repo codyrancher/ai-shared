@@ -111,11 +111,13 @@
       var body = md.slice(heads[i].bodyStart, end);
       var code = body.match(/```[^\n]*\n([\s\S]*?)\n?```/);
       var shot = body.match(/!\[([^\]]*)\]\(([^)]+)\)/);
+      var res = body.match(/^\*\*Result:\*\*\s*\[[^\]]*\]\(([^)]+)\)/im);
       out.push({
         label: heads[i].title,
         why: ((body.match(/^\*\*Why:\*\*[ \t]*(.+)$/m) || [])[1] || '').trim(),
         text: code ? code[1].replace(/\s+$/, '') : '',
-        screenshot: shot ? { alt: shot[1], src: shot[2] } : null
+        screenshot: shot ? { alt: shot[1], src: shot[2] } : null,
+        resultHref: res ? res[1] : null
       });
     }
     return out;
@@ -127,7 +129,13 @@
     if (mdCache[demo.path]) return mdCache[demo.path];
     var p = fetchText(demo.path + '/README.md').then(function (md) {
       var r = parseReadme(md);
-      return { title: r.title, why: r.why, lookFor: r.lookFor, skills: r.skills, links: r.links, media: r.media, prompts: parsePrompts(md) };
+      var prompts = parsePrompts(md);
+      return Promise.all(prompts.map(function (pr) {
+        if (!pr.resultHref) return pr;
+        return fetchText(demo.path + '/' + pr.resultHref).then(function (t) { if (t) pr.resultMd = t; return pr; }, function () { return pr; });
+      })).then(function (prs) {
+        return { title: r.title, why: r.why, lookFor: r.lookFor, skills: r.skills, links: r.links, media: r.media, prompts: prs };
+      });
     });
     mdCache[demo.path] = p;
     return p;
@@ -191,6 +199,46 @@
       lead + '<span class="label">' + esc(label) + '</span></div>';
   }
 
+  // ---- minimal markdown -> html (for rendering captured demo results) ----
+  function mdInline(s) {
+    s = String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    s = s.replace(/`([^`]+)`/g, function (_, c) { return '<code>' + c + '</code>'; });
+    s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, function (_, t, u) { return '<a href="' + u + '" target="_blank" rel="noopener">' + t + '</a>'; });
+    s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    s = s.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
+    return s;
+  }
+  function renderMarkdown(md) {
+    var lines = String(md).replace(/\r/g, '').split('\n'), out = '', i = 0;
+    var esc = function (t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+    while (i < lines.length) {
+      var line = lines[i];
+      if (/^```/.test(line)) {
+        var buf = []; i++;
+        while (i < lines.length && !/^```\s*$/.test(lines[i])) { buf.push(lines[i]); i++; }
+        i++;
+        out += '<pre><code>' + esc(buf.join('\n')) + '</code></pre>'; continue;
+      }
+      if (/^\s*\|.*\|\s*$/.test(line) && i + 1 < lines.length && /^\s*\|?[\s:|-]*-[\s:|-]*\|?\s*$/.test(lines[i + 1])) {
+        var cells = function (l) { return l.trim().replace(/^\||\|$/g, '').split('|').map(function (c) { return c.trim(); }); };
+        var head = cells(line); i += 2; var rows = [];
+        while (i < lines.length && /^\s*\|.*\|\s*$/.test(lines[i])) { rows.push(cells(lines[i])); i++; }
+        out += '<table><thead><tr>' + head.map(function (c) { return '<th>' + mdInline(c) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+          rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + mdInline(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table>'; continue;
+      }
+      var hm = line.match(/^(#{1,6})\s+(.+)$/);
+      if (hm) { var lvl = Math.min(6, hm[1].length + 2); out += '<h' + lvl + '>' + mdInline(hm[2].trim()) + '</h' + lvl + '>'; i++; continue; }
+      if (/^>\s?/.test(line)) { var qb = []; while (i < lines.length && /^>\s?/.test(lines[i])) { qb.push(lines[i].replace(/^>\s?/, '')); i++; } out += '<blockquote>' + mdInline(qb.join(' ')) + '</blockquote>'; continue; }
+      if (/^\s*[-*+]\s+/.test(line)) { var ul = []; while (i < lines.length && /^\s*[-*+]\s+/.test(lines[i])) { ul.push(lines[i].replace(/^\s*[-*+]\s+/, '')); i++; } out += '<ul>' + ul.map(function (t) { return '<li>' + mdInline(t) + '</li>'; }).join('') + '</ul>'; continue; }
+      if (/^\s*\d+\.\s+/.test(line)) { var ol = []; while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) { ol.push(lines[i].replace(/^\s*\d+\.\s+/, '')); i++; } out += '<ol>' + ol.map(function (t) { return '<li>' + mdInline(t) + '</li>'; }).join('') + '</ol>'; continue; }
+      if (/^\s*$/.test(line)) { i++; continue; }
+      var para = [];
+      while (i < lines.length && !/^\s*$/.test(lines[i]) && !/^(#{1,6}\s|```|>\s?|\s*[-*+]\s+|\s*\d+\.\s+)/.test(lines[i]) && !/^\s*\|.*\|\s*$/.test(lines[i])) { para.push(lines[i]); i++; }
+      out += '<p>' + mdInline(para.join(' ')) + '</p>';
+    }
+    return out;
+  }
+
   // ===== Component: ScreenshotThumb ========================================
   // A small clickable screenshot that opens the ImageModal preview.
   //   ScreenshotThumb({src, alt}, basePath) -> html string
@@ -225,6 +273,10 @@
           '<div class="cb-body">' + thumb + '<div class="cb-text">' + body + '</div></div>' +
           '<div class="cb-foot"><span class="hint">Paste into Claude Code in the harness project</span></div>' +
         '</div>' +
+        (prompt.resultMd
+          ? '<div class="claude-reply"><div class="cr-head">' + SPARK + '<span class="who">Claude</span><span class="cr-tag">example result</span></div>' +
+            '<div class="cr-body">' + renderMarkdown(prompt.resultMd) + '</div></div>'
+          : '') +
       '</div>';
   }
 

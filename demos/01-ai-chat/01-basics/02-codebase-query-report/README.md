@@ -12,6 +12,8 @@
 Give me a short orientation report on how cluster provisioning is wired in this dashboard. Cover: the route and entry component, the store modules involved, and where the create/update API calls are made. Every claim must link to an exact file and line. Cap it at 15 bullets and end with the 3 files I should read first.
 ```
 
+**Result:** [example result](files/result.md)
+
 ## What to look for
 
 - Each bullet ends in a file:line reference you can click.

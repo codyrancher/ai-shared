@@ -14,6 +14,8 @@ Why is <this function / component / workaround> written the way it is? Check git
 (Swap the target for a real one, e.g. "why does the Steve proxy rewrite the Host header before forwarding".)
 ```
 
+**Result:** [example result](files/result.md)
+
 ## What to look for
 
 - It cites the introducing PR / issue, not just the current code.
