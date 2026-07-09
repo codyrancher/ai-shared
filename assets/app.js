@@ -30,6 +30,11 @@
   }
   function blobUrl(path, file) { return REPO + '/blob/' + BRANCH + '/' + path + '/' + file; }
   function treeUrl(path) { return REPO + '/tree/' + BRANCH + '/' + path; }
+  // A file chip that opens the FileModal preview on click (and links to GitHub on modified-click).
+  function fileChip(basePath, label, href) {
+    var abs = /^(https?:|\/)/.test(href) ? href : basePath + '/' + href;
+    return '<a class="chip file" href="' + esc(blobUrl(basePath, href)) + '" data-file="' + esc(abs) + '" data-label="' + esc(label) + '">▸ ' + esc(label) + '</a>';
+  }
 
   function copyText(text, btn) {
     var done = function () {
@@ -109,15 +114,35 @@
       if (RESERVED[heads[i].title.toLowerCase()]) continue;
       var end = i + 1 < heads.length ? heads[i + 1].lineStart : md.length;
       var body = md.slice(heads[i].bodyStart, end);
-      var code = body.match(/```[^\n]*\n([\s\S]*?)\n?```/);
-      var shot = body.match(/!\[([^\]]*)\]\(([^)]+)\)/);
-      var res = body.match(/^\*\*Result:\*\*\s*\[[^\]]*\]\(([^)]+)\)/im);
+      // Split the prompt body at the "**Result:**" marker so the prompt's own
+      // screenshot/files are parsed from before it and result media from after.
+      var resIdx = body.search(/^\*\*Result:\*\*/im);
+      var beforeRes = resIdx >= 0 ? body.slice(0, resIdx) : body;
+      var afterRes = resIdx >= 0 ? body.slice(resIdx) : '';
+
+      var code = beforeRes.match(/```[^\n]*\n([\s\S]*?)\n?```/);
+      var shot = beforeRes.match(/!\[([^\]]*)\]\(([^)\s]+)\)/);
+      var filesLine = beforeRes.match(/^\*\*Files:\*\*[ \t]*(.+)$/im);
+      var files = [];
+      if (filesLine) {
+        var fre = /\[([^\]]+)\]\(([^)]+)\)/g, fm;
+        while ((fm = fre.exec(filesLine[1]))) files.push({ label: fm[1].replace(/`/g, ''), href: fm[2] });
+      }
+      // Result: images -> a plain result block; a .md link -> a Claude reply.
+      var resultImages = (afterRes.match(/!\[[^\]]*\]\([^)\s]+\)/g) || []).map(function (x) {
+        var im = x.match(/!\[([^\]]*)\]\(([^)\s]+)\)/); return { alt: im[1], src: im[2] };
+      });
+      var resultHref = null;
+      if (resIdx >= 0 && !resultImages.length) { var lk = afterRes.match(/\[[^\]]*\]\(([^)\s]+)\)/); resultHref = lk ? lk[1] : null; }
+
       out.push({
         label: heads[i].title,
-        why: ((body.match(/^\*\*Why:\*\*[ \t]*(.+)$/m) || [])[1] || '').trim(),
+        why: ((beforeRes.match(/^\*\*Why:\*\*[ \t]*(.+)$/m) || [])[1] || '').trim(),
         text: code ? code[1].replace(/\s+$/, '') : '',
         screenshot: shot ? { alt: shot[1], src: shot[2] } : null,
-        resultHref: res ? res[1] : null
+        resultHref: resultHref,
+        resultImages: resultImages,
+        files: files
       });
     }
     return out;
@@ -200,15 +225,24 @@
   }
 
   // ---- minimal markdown -> html (for rendering captured demo results) ----
+  var mdBase = '';
+  function resolveSrc(src) {
+    return /^(https?:|data:|\/)/.test(src) ? src : (mdBase ? mdBase.replace(/\/$/, '') + '/' + src : src);
+  }
   function mdInline(s) {
     s = String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     s = s.replace(/`([^`]+)`/g, function (_, c) { return '<code>' + c + '</code>'; });
+    s = s.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, function (_, alt, src) {
+      var u = resolveSrc(src);
+      return '<img class="cr-img" alt="' + alt + '" src="' + u + '" data-full="' + u + '" />';
+    });
     s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, function (_, t, u) { return '<a href="' + u + '" target="_blank" rel="noopener">' + t + '</a>'; });
     s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
     s = s.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
     return s;
   }
-  function renderMarkdown(md) {
+  function renderMarkdown(md, basePath) {
+    mdBase = basePath || '';
     var lines = String(md).replace(/\r/g, '').split('\n'), out = '', i = 0;
     var esc = function (t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
     while (i < lines.length) {
@@ -264,6 +298,7 @@
       '<div class="chat">' +
         (prompt.label ? '<div class="prompt-title">' + esc(prompt.label) + '</div>' : '') +
         (prompt.why ? '<div class="prompt-why">' + esc(prompt.why) + '</div>' : '') +
+        (prompt.files && prompt.files.length ? '<div class="prompt-files">' + prompt.files.map(function (f) { return fileChip(basePath, f.label, f.href); }).join('') + '</div>' : '') +
         '<div class="claude-box">' +
           '<div class="cb-head">' + SPARK +
             '<span class="who">You</span>' +
@@ -273,10 +308,18 @@
           '<div class="cb-body">' + thumb + '<div class="cb-text">' + body + '</div></div>' +
           '<div class="cb-foot"><span class="hint">Paste into Claude Code in the harness project</span></div>' +
         '</div>' +
-        (prompt.resultMd
-          ? '<div class="claude-reply"><div class="cr-head">' + SPARK + '<span class="who">Claude</span><span class="cr-tag">example result</span></div>' +
-            '<div class="cr-body">' + renderMarkdown(prompt.resultMd) + '</div></div>'
-          : '') +
+        (prompt.resultImages && prompt.resultImages.length
+          ? '<div class="prompt-result"><div class="pr-label">Result</div>' +
+            prompt.resultImages.map(function (im) {
+              var src = /^(https?:|data:|\/)/.test(im.src) ? im.src : basePath + '/' + im.src;
+              return '<figure class="pr-shot"><img class="cr-img" src="' + esc(src) + '" data-full="' + esc(src) + '" alt="' + esc(im.alt) + '" />' +
+                (im.alt ? '<figcaption>' + esc(im.alt) + '</figcaption>' : '') + '</figure>';
+            }).join('') +
+            '</div>'
+          : (prompt.resultMd
+            ? '<div class="claude-reply"><div class="cr-head">' + SPARK + '<span class="who">Claude</span><span class="cr-tag">example result</span></div>' +
+              '<div class="cr-body">' + renderMarkdown(prompt.resultMd, basePath) + '</div></div>'
+            : '')) +
       '</div>';
   }
 
@@ -378,6 +421,45 @@
     return { mount: mount, open: open, close: close };
   })();
 
+  // ===== Component: FileModal =============================================
+  // Previews a linked file in a modal. Markdown (.md) is rendered; anything
+  // else is shown as raw text.
+  var FileModal = (function () {
+    var root, titleEl, bodyEl, ghEl;
+    function open(url, label, gh) {
+      titleEl.textContent = label || 'File';
+      if (gh) { ghEl.href = gh; ghEl.style.display = ''; } else { ghEl.style.display = 'none'; }
+      bodyEl.innerHTML = '<p class="loading">Loading…</p>';
+      root.classList.add('show'); root.setAttribute('aria-hidden', 'false');
+      fetchText(url).then(function (t) {
+        if (!t) { bodyEl.innerHTML = '<p class="loading">Could not load this file.</p>'; return; }
+        if (/\.(md|markdown)$/i.test(url)) bodyEl.innerHTML = '<div class="cr-body fm-md">' + renderMarkdown(t, url.replace(/\/[^/]*$/, '')) + '</div>';
+        else bodyEl.innerHTML = '<pre class="fm-raw"><code>' + t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</code></pre>';
+        bodyEl.scrollTop = 0;
+      });
+    }
+    function close() { root.classList.remove('show'); root.setAttribute('aria-hidden', 'true'); }
+    function mount() {
+      if (root) return;
+      root = el(
+        '<div class="file-modal" aria-hidden="true">' +
+          '<div class="fm-panel">' +
+            '<div class="fm-head"><span class="fm-title"></span><a class="fm-gh" target="_blank" rel="noopener">GitHub ↗</a><button class="fm-close" aria-label="Close">✕</button></div>' +
+            '<div class="fm-body"></div>' +
+          '</div>' +
+        '</div>'
+      );
+      document.body.appendChild(root);
+      titleEl = root.querySelector('.fm-title');
+      bodyEl = root.querySelector('.fm-body');
+      ghEl = root.querySelector('.fm-gh');
+      root.querySelector('.fm-close').addEventListener('click', close);
+      root.addEventListener('mousedown', function (e) { if (e.target === root) close(); });
+      window.addEventListener('keydown', function (e) { if (e.key === 'Escape' && root.classList.contains('show')) close(); });
+    }
+    return { mount: mount, open: open };
+  })();
+
   // ---- render a demo (copy comes from its prefetched markdown) -----------
   function renderDemo(entry) {
     var d = entry.demo, section = entry.section, group = entry.group;
@@ -393,6 +475,12 @@
     h += '<div class="eyebrow">' + esc(section.title) + (group.title ? ' · ' + esc(group.title) : '') + '</div>';
     h += '<h1 class="demo-title">' + esc(title) + '</h1>';
     if (c.why) h += '<p class="why-lead">' + esc(c.why) + '</p>';
+
+    // Skills & files render above the prompt so they read as relevant context for it.
+    var chips = (c.skills || []).map(function (s) { return '<span class="chip skill">✳ ' + esc(s) + '</span>'; });
+    (c.links || []).forEach(function (l) { chips.push(fileChip(d.path, l.label, l.href)); });
+    if (chips.length) h += '<div class="section-h">Skills &amp; files</div><div class="chips">' + chips.join('') + '</div>';
+
     h += (c.prompts || []).map(function (p, i) { return PromptBox(p, i, d.path); }).join('');
 
     if (c.lookFor && c.lookFor.length) {
@@ -400,20 +488,13 @@
       h += '<ul class="lookfor">' + c.lookFor.map(function (li) { return '<li>' + esc(li) + '</li>'; }).join('') + '</ul>';
     }
 
-    h += '<div class="section-h">Result</div>';
     var media = c.media || [];
-    h += '<div class="media-grid">' + (media.length
-      ? media.map(function (m) { return mediaCard(m, d.path); }).join('')
-      : '<div class="media-card"><div class="placeholder"><div>No media yet</div></div></div>') + '</div>';
+    if (media.length) {
+      h += '<div class="section-h">Result</div>';
+      h += '<div class="media-grid">' + media.map(function (m) { return mediaCard(m, d.path); }).join('') + '</div>';
+    }
 
-    var chips = (c.skills || []).map(function (s) { return '<span class="chip skill">✳ ' + esc(s) + '</span>'; });
-    (c.links || []).forEach(function (l) {
-      chips.push('<a class="chip file" target="_blank" rel="noopener" href="' + esc(blobUrl(d.path, l.href)) + '">▸ ' + esc(l.label) + '</a>');
-    });
-    chips.push('<a class="chip file" target="_blank" rel="noopener" href="' + esc(blobUrl(d.path, 'README.md')) + '">▸ README.md</a>');
-    h += '<div class="section-h">Skills &amp; files</div><div class="chips">' + chips.join('') + '</div>';
-
-    h += '<div class="folder-link">Demo folder: <a target="_blank" rel="noopener" href="' + esc(treeUrl(d.path)) + '"><code>' + esc(d.path) + '</code></a></div>';
+    h += '<div class="folder-link">Demo folder: <a target="_blank" rel="noopener" href="' + esc(treeUrl(d.path)) + '"><code>' + esc(d.path) + '</code></a> · <a target="_blank" rel="noopener" href="' + esc(blobUrl(d.path, 'README.md')) + '">README.md</a></div>';
 
     var content = document.getElementById('content');
     content.innerHTML = h;
@@ -424,6 +505,16 @@
     });
     Array.prototype.forEach.call(content.querySelectorAll('.prompt-thumb'), function (btn) {
       btn.addEventListener('click', function () { ImageModal.open(btn.getAttribute('data-src'), btn.getAttribute('data-alt')); });
+    });
+    Array.prototype.forEach.call(content.querySelectorAll('.chip.file'), function (a) {
+      a.addEventListener('click', function (e) {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; // let modified-click open GitHub
+        e.preventDefault();
+        FileModal.open(a.getAttribute('data-file'), a.getAttribute('data-label'), a.getAttribute('href'));
+      });
+    });
+    Array.prototype.forEach.call(content.querySelectorAll('.cr-img'), function (img) {
+      img.addEventListener('click', function () { ImageModal.open(img.getAttribute('data-full') || img.getAttribute('src'), img.getAttribute('alt') || ''); });
     });
   }
 
@@ -482,6 +573,7 @@
       document.body.classList.toggle('nav-open');
     });
     ImageModal.mount();
+    FileModal.mount();
     window.addEventListener('hashchange', route);
     document.getElementById('tree').innerHTML = '<div class="loading" style="padding:12px 16px">Loading…</div>';
     document.getElementById('content').innerHTML = '<p class="loading">Loading demos…</p>';

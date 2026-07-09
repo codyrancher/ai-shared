@@ -43,20 +43,27 @@ renders its demos directly under the section.
   - `**Why:** <text>` -> per-prompt line
   - first fenced code block -> the prompt text (copyable)
   - optional `![alt](media/x.png)` -> screenshot thumbnail (opens the modal)
-  - optional `**Result:** [label](files/result.md)` -> renders that markdown file as a
-    "Claude" reply bubble under the prompt (a captured example result)
+  - optional `**Result:**` -> a result shown under the prompt, in one of two forms:
+    - `**Result:** [label](files/result.md)` -> renders the markdown file as a "Claude"
+      reply bubble (for a captured text answer)
+    - `**Result:**` followed by `![caption](media/x.png)` image lines -> a plain "Result"
+      block of screenshots (click to zoom), not a chat bubble
+  - optional `**Files:** [label](files/x.md) [label2](files/y)` -> file chips shown above
+    the prompt; clicking one opens a preview modal (markdown for `.md`, raw text otherwise)
 - **Reserved `##` sections** (parsed by name, never treated as prompts):
   - `## What to look for` -> `-` bullets become look-for items.
   - `## Skills & files` -> `-` bullets: `` `name` `` -> skill chip; `` [`label`](href) ``
-    -> file-link chip (`href` relative to the demo folder).
+    -> file chip (`href` relative to the demo folder) that opens the preview modal on
+    click. Renders above the prompts. (Per-prompt `**Files:**` is usually cleaner.)
   - `## Result` -> `-` bullets, one per media asset:
     `` - `media/foo.webm` - Caption (pending: my-browser-record-video) ``. Type is inferred
     from the extension; `(pending: <tool>)` means not captured yet (drop the file into
     `media/` and delete that part to show it).
   - `## Notes` -> ignored by the site (human notes).
 
-Recommended order: title + why, then the prompt sections, then What to look for /
-Skills & files / Result / Notes.
+Recommended order: title + why, then Skills & files, then the prompt sections, then
+What to look for / Result / Notes. On the site, Skills & files renders above the
+prompt so it reads as relevant context for it.
 
 ## Add a demo
 
