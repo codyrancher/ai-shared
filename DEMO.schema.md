@@ -43,11 +43,12 @@ renders its demos directly under the section.
   - `**Why:** <text>` -> per-prompt line
   - first fenced code block -> the prompt text (copyable)
   - optional `![alt](media/x.png)` -> screenshot thumbnail (opens the modal)
-  - optional `**Result:**` -> a result shown under the prompt, in one of two forms:
-    - `**Result:** [label](files/result.md)` -> renders the markdown file as a "Claude"
-      reply bubble (for a captured text answer)
-    - `**Result:**` followed by `![caption](media/x.png)` image lines -> a plain "Result"
-      block of screenshots (click to zoom), not a chat bubble
+  - optional `**Result:**` -> a result shown under the prompt. It may include:
+    - `![caption](media/x.png)` / `![caption](media/x.mp4)` lines -> a plain "Result"
+      block of screenshots (click to zoom) or a video player, and/or
+    - `[label](files/result.md)` -> the markdown file rendered as a "Claude" reply bubble
+      (for a captured text answer)
+    - media and a text reply can both be present; media renders first
   - optional `**Files:** [label](files/x.md) [label2](files/y)` -> file chips shown above
     the prompt; clicking one opens a preview modal (markdown for `.md`, raw text otherwise)
 - **Reserved `##` sections** (parsed by name, never treated as prompts):

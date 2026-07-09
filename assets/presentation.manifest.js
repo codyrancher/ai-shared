@@ -25,13 +25,13 @@ window.PRESENTATION = {
         "demos/01-ai-chat/01-basics/01-screenshot-prompting",
         "demos/01-ai-chat/01-basics/02-codebase-query-report",
         "demos/01-ai-chat/01-basics/03-why-was-it-implemented",
-        "demos/01-ai-chat/01-basics/04-customize-with-claude-md",
-        "demos/01-ai-chat/01-basics/05-provision-oidc-outside-cluster",
-        "demos/01-ai-chat/01-basics/06-reduce-domains-more-tools"
+        "demos/01-ai-chat/01-basics/04-behavior-environment",
+        "demos/01-ai-chat/01-basics/05-reduce-domains-more-tools"
       ] },
       { id: "intermediate", title: "Intermediate", blurb: "Package repeated work into skills and drive the browser from the CLI.", demos: [
-        "demos/01-ai-chat/02-intermediate/01-making-your-own-skills",
-        "demos/01-ai-chat/02-intermediate/02-browser-skills-live"
+        "demos/01-ai-chat/02-intermediate/01-provisioning-resources-infra",
+        "demos/01-ai-chat/02-intermediate/02-making-your-own-skills",
+        "demos/01-ai-chat/02-intermediate/03-browser-skills-live"
       ] },
       { id: "advanced", title: "Advanced", blurb: "Let the agent loop on itself, analyze the whole backlog, and run multi-stage pipelines from prompts alone.", demos: [
         "demos/01-ai-chat/03-advanced/01-agent-loop-resolve-issue",

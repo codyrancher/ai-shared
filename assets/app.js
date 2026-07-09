@@ -128,12 +128,13 @@
         var fre = /\[([^\]]+)\]\(([^)]+)\)/g, fm;
         while ((fm = fre.exec(filesLine[1]))) files.push({ label: fm[1].replace(/`/g, ''), href: fm[2] });
       }
-      // Result: images -> a plain result block; a .md link -> a Claude reply.
-      var resultImages = (afterRes.match(/!\[[^\]]*\]\([^)\s]+\)/g) || []).map(function (x) {
-        var im = x.match(/!\[([^\]]*)\]\(([^)\s]+)\)/); return { alt: im[1], src: im[2] };
+      // Result: images/videos -> a plain result block; a .md link -> a Claude reply. Both may coexist.
+      var resultMedia = (afterRes.match(/!\[[^\]]*\]\([^)\s]+\)/g) || []).map(function (x) {
+        var im = x.match(/!\[([^\]]*)\]\(([^)\s]+)\)/);
+        return { alt: im[1], src: im[2], type: /\.(mp4|webm|mov|m4v)$/i.test(im[2]) ? 'video' : 'image' };
       });
-      var resultHref = null;
-      if (resIdx >= 0 && !resultImages.length) { var lk = afterRes.match(/\[[^\]]*\]\(([^)\s]+)\)/); resultHref = lk ? lk[1] : null; }
+      var linkMatch = resIdx >= 0 ? afterRes.match(/(?:^|[^!])\[[^\]]*\]\(([^)\s]+)\)/) : null;
+      var resultHref = linkMatch ? linkMatch[1] : null;
 
       out.push({
         label: heads[i].title,
@@ -141,7 +142,7 @@
         text: code ? code[1].replace(/\s+$/, '') : '',
         screenshot: shot ? { alt: shot[1], src: shot[2] } : null,
         resultHref: resultHref,
-        resultImages: resultImages,
+        resultMedia: resultMedia,
         files: files
       });
     }
@@ -308,18 +309,21 @@
           '<div class="cb-body">' + thumb + '<div class="cb-text">' + body + '</div></div>' +
           '<div class="cb-foot"><span class="hint">Paste into Claude Code in the harness project</span></div>' +
         '</div>' +
-        (prompt.resultImages && prompt.resultImages.length
+        (prompt.resultMd
+          ? '<div class="claude-reply"><div class="cr-head">' + SPARK + '<span class="who">Claude</span><span class="cr-tag">example result</span></div>' +
+            '<div class="cr-body">' + renderMarkdown(prompt.resultMd, basePath) + '</div></div>'
+          : '') +
+        (prompt.resultMedia && prompt.resultMedia.length
           ? '<div class="prompt-result"><div class="pr-label">Result</div>' +
-            prompt.resultImages.map(function (im) {
-              var src = /^(https?:|data:|\/)/.test(im.src) ? im.src : basePath + '/' + im.src;
-              return '<figure class="pr-shot"><img class="cr-img" src="' + esc(src) + '" data-full="' + esc(src) + '" alt="' + esc(im.alt) + '" />' +
-                (im.alt ? '<figcaption>' + esc(im.alt) + '</figcaption>' : '') + '</figure>';
+            prompt.resultMedia.map(function (m) {
+              var src = /^(https?:|data:|\/)/.test(m.src) ? m.src : basePath + '/' + m.src;
+              var inner = m.type === 'video'
+                ? '<video class="pr-video" controls preload="metadata" src="' + esc(src) + '"></video>'
+                : '<img class="cr-img" src="' + esc(src) + '" data-full="' + esc(src) + '" alt="' + esc(m.alt) + '" />';
+              return '<figure class="pr-shot">' + inner + (m.alt ? '<figcaption>' + esc(m.alt) + '</figcaption>' : '') + '</figure>';
             }).join('') +
             '</div>'
-          : (prompt.resultMd
-            ? '<div class="claude-reply"><div class="cr-head">' + SPARK + '<span class="who">Claude</span><span class="cr-tag">example result</span></div>' +
-              '<div class="cr-body">' + renderMarkdown(prompt.resultMd, basePath) + '</div></div>'
-            : '')) +
+          : '') +
       '</div>';
   }
 
