@@ -4,26 +4,41 @@
 
 **Why:** Turn "reproduce this and film it" into one instruction, and batch it across the backlog while you work on something else.
 
-## Record a before video
+## Take a screenshot
 
-**Why:** Saves the manual click-and-screen-record loop, and hands the next person a ready-made repro instead of a vague description.
-
-```
-Reproduce issue #<N> against the live Rancher and record a before video. Use the my-browser-record-video skill: iterate to find the exact click sequence, save it as a Playwright script, then play it back with browser.mjs record-script so the recording is one clean take.
-```
-
-## Labeled before/after comparison
-
-**Why:** No manual before/after cropping or arrow-drawing; the changed element is boxed for you.
+**Why:** Grab the current state of a page without leaving the terminal or wiring up any tooling.
 
 ```
-Take a labeled before/after comparison screenshot of the affected page with my-browser-screenshot-comparison, master versus this branch, and draw a red box around the element that changed.
+Take a screenshot of [the cluster management page] on the live Rancher and save it to disk.
+```
+
+## Verify your change visually
+
+**Why:** Confirm a fix actually works in the real UI instead of trusting that the diff and the tests look right.
+
+```
+Verify [my change] by driving the affected page on the live Rancher and taking a screenshot. Confirm the new behavior shows up, not just that the tests pass.
+```
+
+## Record a video
+
+**Why:** Capture a short screen recording of a flow, hands-free and in one clean take.
+
+```
+Record a short video of [the flow I describe] on the live Rancher using the my-browser-record-video skill. Iterate to find the exact click sequence first, then play it back so the recording is one clean take.
+```
+
+## Reproduce an issue
+
+**Why:** Turn a vague bug report into a verified, filmed repro the next person can just watch.
+
+```
+Reproduce issue #[N] against the live Rancher, then record the repro as one clean video.
 ```
 
 ## Skills & files
 
 - `my-browser-record-video`
-- `my-browser-screenshot-comparison`
 - `my-video-censor-ip`
 
 ## Notes

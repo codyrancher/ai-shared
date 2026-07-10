@@ -21,9 +21,27 @@ Please create 20 config-maps in the rancher instance.
 ![The 20 config-maps in the config-demo namespace](media/configmap-list.png)
 ![Detail of demo-config-19 and its data-19 key](media/configmap-detail.png)
 
+## Quickly Exercise UI Areas
+
+**Why:** Populate a screen with resources in every state you need to show, instead of hand-crafting each one to hit an edge case.
+
+**Files:** [CLAUDE.md](files/CLAUDE.md)
+
+```
+Can you generate a number of resources with varying states so we can demonstrate and exercise the Resources card seen in the screenshot?
+```
+
+![The Resources card to populate and exercise](media/demo-resource-card.png)
+
+**Result:**
+[example result](files/resources-card.md)
+![The Resources card populated with resources in varying states](media/demo-resource-result.png)
+
 ## Stand up and connect OIDC
 
 **Why:** Saves an afternoon of container, client, and auth-config wiring, and it verifies the login for you at the end.
+
+**Files:** [CLAUDE.md](files/CLAUDE.md)
 
 ```
 Stand up a local OIDC providers using a docker container. Create several users and then wire to the Rancher Instance as an auth provider. After you're done provide each user name and pass in a table.
@@ -32,10 +50,6 @@ Stand up a local OIDC providers using a docker container. Create several users a
 **Result:**
 ![OIDC provider set up and login working](media/demo-oidc.mp4)
 [example result](files/result.md)
-
-## Skills & files
-
-- [`CLAUDE.md`](files/CLAUDE.md)
 
 ## Notes
 
