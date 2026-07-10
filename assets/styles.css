@@ -380,6 +380,16 @@ h1.demo-title { font-size: 30px; line-height: 1.15; margin: 0 0 14px; color: var
 .cr-body .cr-img { max-width: 100%; height: auto; display: block; margin: 12px 0; border: 1px solid var(--border-2); border-radius: 8px; cursor: zoom-in; }
 .cr-body .cr-img:hover { border-color: var(--claude-coral); }
 
+/* A full markdown page (anything under pages/). Reuses .cr-body for tables,
+   code, links, and images, but reads at page scale rather than reply scale. */
+.page-body { padding: 0; font-size: 15px; }
+.page-body > :first-child { margin-top: 0; }
+.page-body h1 { font-size: 30px; line-height: 1.15; margin: 0 0 14px; color: var(--text-bright); font-weight: 650; }
+.page-body h2 { font-size: 19px; margin: 30px 0 10px; color: var(--text-bright); font-weight: 650; }
+.page-body p { margin: 12px 0; line-height: 1.6; }
+.page-body ul, .page-body ol { margin: 12px 0; }
+.page-body li { margin: 6px 0; }
+
 /* Plain per-prompt result (e.g. screenshots) - not a chat bubble */
 .prompt-result { margin-top: 14px; }
 .pr-label { font-size: 12px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-dim); margin: 0 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border-2); }
@@ -492,5 +502,6 @@ ul.lookfor li::before {
   .titlebar .hamburger { display: block; }
   .content { padding: 24px 18px 80px; }
   h1.demo-title { font-size: 24px; }
+  .page-body h1 { font-size: 24px; }
   .ov-hero h1 { font-size: 30px; }
 }
