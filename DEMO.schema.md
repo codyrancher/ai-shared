@@ -48,6 +48,8 @@ renders its demos directly under the section.
       block of screenshots (click to zoom) or a video player, and/or
     - `[label](files/result.md)` -> the markdown file rendered as a "Claude" reply bubble
       (for a captured text answer)
+    - `[label](files/result.html)` -> a clickable preview of the generated HTML page that
+      opens it, rendered, in a lightbox modal (for a generated diagram/report page)
     - media and a text reply can both be present; media renders first
   - optional `**Files:** [label](files/x.md) [label2](files/y)` -> file chips shown above
     the prompt; clicking one opens a preview modal (markdown for `.md`, raw text otherwise)
@@ -56,15 +58,11 @@ renders its demos directly under the section.
   - `## Skills & files` -> `-` bullets: `` `name` `` -> skill chip; `` [`label`](href) ``
     -> file chip (`href` relative to the demo folder) that opens the preview modal on
     click. Renders above the prompts. (Per-prompt `**Files:**` is usually cleaner.)
-  - `## Result` -> `-` bullets, one per media asset:
-    `` - `media/foo.webm` - Caption (pending: my-browser-record-video) ``. Type is inferred
-    from the extension; `(pending: <tool>)` means not captured yet (drop the file into
-    `media/` and delete that part to show it).
   - `## Notes` -> ignored by the site (human notes).
 
 Recommended order: title + why, then Skills & files, then the prompt sections, then
-What to look for / Result / Notes. On the site, Skills & files renders above the
-prompt so it reads as relevant context for it.
+Notes. On the site, Skills & files renders above the prompt so it reads as relevant
+context for it.
 
 ## Add a demo
 

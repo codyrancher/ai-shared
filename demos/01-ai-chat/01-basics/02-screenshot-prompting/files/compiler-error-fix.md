@@ -1,0 +1,1 @@
+The `data()` method was missing its closing `},` after the `return` statement's `};`. Added the missing comma after the closing brace so `mounted()` is properly recognized as a separate component option. The compiler error should be resolved now.

@@ -1,0 +1,726 @@
+<title>fetchSummaries Data Flow</title>
+<style>
+  :root {
+    --bg: #F3F5F9;
+    --bg-card: #FFFFFF;
+    --bg-card-alt: #F8F9FC;
+    --text: #1B2A4A;
+    --text-secondary: #5A6B8A;
+    --text-tertiary: #8393AD;
+    --border: #D8DFE9;
+    --border-light: #E8ECF2;
+    --accent-blue: #3B7DD8;
+    --accent-teal: #0C8C88;
+    --accent-purple: #6B4EAF;
+    --accent-amber: #C47A20;
+    --accent-red: #C04040;
+    --accent-green: #2D8A5E;
+    --lane-server: #EEF4FD;
+    --lane-model: #F0FBF9;
+    --lane-store: #F3F0FA;
+    --lane-api: #FDF5EC;
+    --lane-ui: #F0FBF5;
+    --code-bg: #F0F2F6;
+    --code-text: #1B2A4A;
+    --arrow: #3B7DD8;
+    --shadow: 0 1px 3px rgba(27,42,74,0.07), 0 4px 12px rgba(27,42,74,0.04);
+    --shadow-hover: 0 2px 8px rgba(27,42,74,0.1), 0 8px 24px rgba(27,42,74,0.06);
+    --mono: 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+    --sans: 'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0F1319;
+      --bg-card: #1A1F2B;
+      --bg-card-alt: #1E2433;
+      --text: #D8DFE9;
+      --text-secondary: #8D9AB5;
+      --text-tertiary: #5E6D8A;
+      --border: #2A3244;
+      --border-light: #232B3C;
+      --accent-blue: #5B9AEE;
+      --accent-teal: #2DBAB4;
+      --accent-purple: #9B82D8;
+      --accent-amber: #E09A40;
+      --accent-red: #E06060;
+      --accent-green: #4CB87A;
+      --lane-server: #141B2A;
+      --lane-model: #121D1E;
+      --lane-store: #18152A;
+      --lane-api: #1D1810;
+      --lane-ui: #121D18;
+      --code-bg: #141820;
+      --code-text: #C5CEE0;
+      --arrow: #5B9AEE;
+      --shadow: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.15);
+      --shadow-hover: 0 2px 8px rgba(0,0,0,0.25), 0 8px 24px rgba(0,0,0,0.2);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0F1319;
+    --bg-card: #1A1F2B;
+    --bg-card-alt: #1E2433;
+    --text: #D8DFE9;
+    --text-secondary: #8D9AB5;
+    --text-tertiary: #5E6D8A;
+    --border: #2A3244;
+    --border-light: #232B3C;
+    --accent-blue: #5B9AEE;
+    --accent-teal: #2DBAB4;
+    --accent-purple: #9B82D8;
+    --accent-amber: #E09A40;
+    --accent-red: #E06060;
+    --accent-green: #4CB87A;
+    --lane-server: #141B2A;
+    --lane-model: #121D1E;
+    --lane-store: #18152A;
+    --lane-api: #1D1810;
+    --lane-ui: #121D18;
+    --code-bg: #141820;
+    --code-text: #C5CEE0;
+    --arrow: #5B9AEE;
+    --shadow: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.15);
+    --shadow-hover: 0 2px 8px rgba(0,0,0,0.25), 0 8px 24px rgba(0,0,0,0.2);
+  }
+
+  :root[data-theme="light"] {
+    --bg: #F3F5F9;
+    --bg-card: #FFFFFF;
+    --bg-card-alt: #F8F9FC;
+    --text: #1B2A4A;
+    --text-secondary: #5A6B8A;
+    --text-tertiary: #8393AD;
+    --border: #D8DFE9;
+    --border-light: #E8ECF2;
+    --accent-blue: #3B7DD8;
+    --accent-teal: #0C8C88;
+    --accent-purple: #6B4EAF;
+    --accent-amber: #C47A20;
+    --accent-red: #C04040;
+    --accent-green: #2D8A5E;
+    --lane-server: #EEF4FD;
+    --lane-model: #F0FBF9;
+    --lane-store: #F3F0FA;
+    --lane-api: #FDF5EC;
+    --lane-ui: #F0FBF5;
+    --code-bg: #F0F2F6;
+    --code-text: #1B2A4A;
+    --arrow: #3B7DD8;
+    --shadow: 0 1px 3px rgba(27,42,74,0.07), 0 4px 12px rgba(27,42,74,0.04);
+    --shadow-hover: 0 2px 8px rgba(27,42,74,0.1), 0 8px 24px rgba(27,42,74,0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 48px 24px 64px;
+  }
+
+  .header {
+    margin-bottom: 40px;
+  }
+
+  .header h1 {
+    font-size: 22px;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .header .file-ref {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-tertiary);
+    letter-spacing: 0.01em;
+  }
+
+  .header .subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 12px;
+    max-width: 60ch;
+    line-height: 1.6;
+  }
+
+  /* Lane system */
+  .lane {
+    position: relative;
+    padding: 20px 20px 24px;
+    border-radius: 10px;
+    margin-bottom: 4px;
+  }
+
+  .lane-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .lane-label .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .lane-server { background: var(--lane-server); }
+  .lane-server .dot { background: var(--accent-blue); }
+
+  .lane-model { background: var(--lane-model); }
+  .lane-model .dot { background: var(--accent-teal); }
+
+  .lane-store { background: var(--lane-store); }
+  .lane-store .dot { background: var(--accent-purple); }
+
+  .lane-api { background: var(--lane-api); }
+  .lane-api .dot { background: var(--accent-amber); }
+
+  .lane-ui { background: var(--lane-ui); }
+  .lane-ui .dot { background: var(--accent-green); }
+
+  /* Node cards */
+  .node {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.15s ease;
+  }
+
+  .node:hover {
+    box-shadow: var(--shadow-hover);
+  }
+
+  .node-header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+
+  .node-name {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .node-line {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--text-tertiary);
+    letter-spacing: 0.01em;
+  }
+
+  .node-type {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+    line-height: 1.4;
+  }
+
+  .type-getter { color: var(--accent-teal); background: color-mix(in srgb, var(--accent-teal) 10%, transparent); }
+  .type-method { color: var(--accent-blue); background: color-mix(in srgb, var(--accent-blue) 10%, transparent); }
+  .type-action { color: var(--accent-purple); background: color-mix(in srgb, var(--accent-purple) 10%, transparent); }
+  .type-api { color: var(--accent-amber); background: color-mix(in srgb, var(--accent-amber) 10%, transparent); }
+  .type-component { color: var(--accent-green); background: color-mix(in srgb, var(--accent-green) 10%, transparent); }
+
+  .node-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+  }
+
+  .node-code {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    line-height: 1.55;
+    color: var(--code-text);
+    background: var(--code-bg);
+    border-radius: 5px;
+    padding: 10px 12px;
+    margin-top: 8px;
+    overflow-x: auto;
+    white-space: pre;
+    border: 1px solid var(--border-light);
+  }
+
+  .node-data {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .data-tag {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--text-secondary);
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-light);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  /* Arrows between nodes */
+  .arrow-down {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 0;
+    gap: 0;
+  }
+
+  .arrow-down .shaft {
+    width: 1.5px;
+    height: 18px;
+    background: var(--arrow);
+    opacity: 0.5;
+  }
+
+  .arrow-down .head {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid var(--arrow);
+    opacity: 0.5;
+  }
+
+  .arrow-down .label {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+    letter-spacing: 0.02em;
+  }
+
+  /* Split flow */
+  .split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 2px;
+  }
+
+  .split-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 2px;
+  }
+
+  .check-node {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    box-shadow: var(--shadow);
+  }
+
+  .check-node .check-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent-amber);
+    margin-bottom: 4px;
+  }
+
+  .check-node .check-text {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.45;
+  }
+
+  /* Response shape */
+  .response-shape {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
+  }
+
+  .response-shape .shape-title {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 8px;
+  }
+
+  .shape-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .shape-field {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 12px;
+  }
+
+  .shape-field .field-name {
+    font-family: var(--mono);
+    font-weight: 600;
+    color: var(--text);
+    min-width: 80px;
+  }
+
+  .shape-field .field-type {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+  }
+
+  .shape-field .field-desc {
+    color: var(--text-secondary);
+    font-size: 11.5px;
+  }
+
+  /* Error path */
+  .error-note {
+    font-size: 11.5px;
+    color: var(--accent-red);
+    font-style: italic;
+    margin-top: 8px;
+    padding-left: 12px;
+    border-left: 2px solid color-mix(in srgb, var(--accent-red) 30%, transparent);
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 28px;
+    padding: 12px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .legend-item .swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+  }
+
+  @media (max-width: 640px) {
+    .page { padding: 32px 16px 48px; }
+    .split, .split-3 { grid-template-columns: 1fr; }
+    .header h1 { font-size: 19px; }
+    .legend { gap: 10px; }
+  }
+</style>
+
+<div class="page">
+  <div class="header">
+    <h1>fetchSummaries() Data Flow</h1>
+    <div class="file-ref">shell/models/workload.js : 594-615</div>
+    <p class="subtitle">How a workload's pod state summary travels from server-injected metadata through Vuex into the StatusCard UI component.</p>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="swatch" style="background:var(--accent-blue)"></div> Server / Rancher API</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--accent-teal)"></div> Workload model</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--accent-purple)"></div> Vuex store (Steve)</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--accent-amber)"></div> HTTP / Steve API</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--accent-green)"></div> UI component</div>
+  </div>
+
+  <!-- LAYER 1: Server data -->
+  <div class="lane lane-server">
+    <div class="lane-label"><div class="dot"></div> Rancher API Response</div>
+    <div class="node">
+      <div class="node-header">
+        <span class="node-name">metadata.relationships[]</span>
+        <span class="node-type type-api">Server-injected</span>
+      </div>
+      <div class="node-desc">
+        Rancher enriches every resource with a <code>relationships</code> array. Each entry links this workload to related resources. The entry where <code>toType === "pod"</code> carries a <code>.selector</code> string.
+      </div>
+      <div class="node-code">{ toType: "pod", selector: "app=nginx,version=v2" }</div>
+    </div>
+  </div>
+
+  <div class="arrow-down"><div class="shaft"></div><div class="head"></div><div class="label">relationships[0].selector</div></div>
+
+  <!-- LAYER 2: Model getters -->
+  <div class="lane lane-model">
+    <div class="lane-label"><div class="dot"></div> Workload Model Getters</div>
+
+    <div class="node" style="margin-bottom:12px">
+      <div class="node-header">
+        <span class="node-name">get podSelector()</span>
+        <span class="node-line">line 638</span>
+        <span class="node-type type-getter">Getter</span>
+      </div>
+      <div class="node-desc">
+        Finds the first relationship with <code>toType === POD</code> and returns its <code>.selector</code> string.
+      </div>
+      <div class="node-code">relationships.filter(r => r.toType === POD)[0]?.selector
+// => "app=nginx,version=v2"</div>
+    </div>
+
+    <div class="arrow-down"><div class="shaft" style="height:10px"></div><div class="head"></div><div class="label">string selector</div></div>
+
+    <div class="node">
+      <div class="node-header">
+        <span class="node-name">get podMatchExpression()</span>
+        <span class="node-line">line 648</span>
+        <span class="node-type type-getter">Getter</span>
+      </div>
+      <div class="node-desc">
+        Parses the string selector into a Kubernetes <code>matchExpressions</code> array via <code>parse()</code> from <code>@shell/utils/selector.js</code>.
+      </div>
+      <div class="node-code">parse("app=nginx,version=v2")
+// => [
+//   { key: "app",     operator: "In", values: ["nginx"] },
+//   { key: "version", operator: "In", values: ["v2"] }
+// ]</div>
+    </div>
+  </div>
+
+  <div class="arrow-down"><div class="shaft"></div><div class="head"></div><div class="label">matchExpressions[]</div></div>
+
+  <!-- LAYER 3: fetchSummaries method -->
+  <div class="lane lane-model">
+    <div class="lane-label"><div class="dot"></div> Workload Model Method</div>
+
+    <div class="node">
+      <div class="node-header">
+        <span class="node-name">fetchSummaries()</span>
+        <span class="node-line">line 594</span>
+        <span class="node-type type-method">Async method</span>
+      </div>
+      <div class="node-desc">
+        Assembles the dispatch payload and calls <code>this.$dispatch('fetchResourceSummary', ...)</code> through the Vuex store context.
+      </div>
+      <div class="node-code">this.$dispatch('fetchResourceSummary', {
+  type: POD,
+  opt: {
+    summaryField:  'metadata.state.name',
+    namespace:     this.metadata.namespace,
+    labelSelector: { matchExpressions: this.podMatchExpression }
+  }
+})</div>
+      <div class="node-data">
+        <span class="data-tag">type: "pod"</span>
+        <span class="data-tag">summaryField: "metadata.state.name"</span>
+        <span class="data-tag">namespace: from metadata</span>
+        <span class="data-tag">labelSelector: matchExpressions</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-down"><div class="shaft"></div><div class="head"></div><div class="label">$dispatch (Vuex context)</div></div>
+
+  <!-- LAYER 4: Steve store action -->
+  <div class="lane lane-store">
+    <div class="lane-label"><div class="dot"></div> Vuex Steve Store</div>
+
+    <div class="node">
+      <div class="node-header">
+        <span class="node-name">fetchResourceSummary</span>
+        <span class="node-line">steve/actions.js : 256</span>
+        <span class="node-type type-action">Action</span>
+      </div>
+      <div class="node-desc">
+        Validates preconditions, builds the Steve summary API URL, and dispatches the HTTP request.
+      </div>
+
+      <div style="margin-top:12px">
+        <div style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:8px;">Precondition checks</div>
+        <div class="split-3">
+          <div class="check-node">
+            <div class="check-label">Check 1</div>
+            <div class="check-text">schemaFor(type) exists</div>
+          </div>
+          <div class="check-node">
+            <div class="check-label">Check 2</div>
+            <div class="check-text">STEVE_CACHE feature flag is enabled (VAI)</div>
+          </div>
+          <div class="check-node">
+            <div class="check-label">Check 3</div>
+            <div class="check-text">summaryField is provided</div>
+          </div>
+        </div>
+        <div class="error-note">Any check failing returns <code>undefined</code> with a console.warn</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-down"><div class="shaft"></div><div class="head"></div><div class="label">URL construction</div></div>
+
+  <!-- LAYER 5: URL construction + HTTP -->
+  <div class="lane lane-api">
+    <div class="lane-label"><div class="dot"></div> Steve Summary API</div>
+
+    <div class="node" style="margin-bottom:12px">
+      <div class="node-header">
+        <span class="node-name">URL construction</span>
+        <span class="node-type type-api">URL builder</span>
+      </div>
+      <div class="node-desc">
+        Starts from <code>schema.links.collection</code>, appends the namespace path segment, then sets query parameters for the summary field, label selector filters, and the summary-only flag.
+      </div>
+      <div class="node-code">/v1/pods/{namespace}
+  ?summary=metadata.state.name
+  &summaryonly=
+  &filter=metadata.labels[app]+IN+(nginx)
+  &filter=metadata.labels[version]+IN+(v2)</div>
+      <div class="node-data">
+        <span class="data-tag">convertLabelSelectorPaginationParams()</span>
+        <span class="data-tag">steve-pagination-utils.ts : 659</span>
+      </div>
+    </div>
+
+    <div class="arrow-down"><div class="shaft" style="height:10px"></div><div class="head"></div><div class="label">dispatch('request', { opt: { url } })</div></div>
+
+    <div class="node">
+      <div class="node-header">
+        <span class="node-name">request</span>
+        <span class="node-line">steve/actions.js : 22</span>
+        <span class="node-type type-action">Action</span>
+      </div>
+      <div class="node-desc">
+        HTTP GET through the Rancher proxy. Handles deduplication of identical in-flight requests. Returns the raw Steve API JSON.
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-down"><div class="shaft"></div><div class="head"></div><div class="label">{ count, summary }</div></div>
+
+  <!-- Response shape -->
+  <div class="lane lane-store">
+    <div class="lane-label"><div class="dot"></div> Response Normalization</div>
+    <div class="response-shape">
+      <div class="shape-title">Returned shape</div>
+      <div class="shape-fields">
+        <div class="shape-field">
+          <span class="field-name">count</span>
+          <span class="field-type">number</span>
+          <span class="field-desc">- total matching pods (defaults to 0)</span>
+        </div>
+        <div class="shape-field">
+          <span class="field-name">summary</span>
+          <span class="field-type">Array | null</span>
+          <span class="field-desc">- aggregation by summaryField</span>
+        </div>
+      </div>
+      <div class="node-code">{ count: 10, summary: [{
+    property: "metadata.state.name",
+    counts: {
+      running: { total: 7 },
+      error:   { total: 3 }
+    }
+  }]
+}</div>
+      <div class="error-note">On network failure, the action returns <code>undefined</code>; the caller catches this and logs a warning</div>
+    </div>
+  </div>
+
+  <div class="arrow-down"><div class="shaft"></div><div class="head"></div><div class="label">set(this, '_summaries', { pods: result })</div></div>
+
+  <!-- LAYER 6: Storage + consumers -->
+  <div class="lane lane-model">
+    <div class="lane-label"><div class="dot"></div> Workload Model Storage</div>
+    <div class="node">
+      <div class="node-header">
+        <span class="node-name">_summaries.pods</span>
+        <span class="node-line">line 612</span>
+        <span class="node-type type-getter">Reactive property</span>
+      </div>
+      <div class="node-desc">
+        Set via Vue's <code>set()</code> to ensure reactivity. Holds <code>{ count, summary }</code> (or <code>null</code> on failure).
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-down"><div class="shaft"></div><div class="head"></div><div class="label">this._summaries?.pods</div></div>
+
+  <!-- LAYER 7: UI consumption -->
+  <div class="lane lane-ui">
+    <div class="lane-label"><div class="dot"></div> UI Consumption</div>
+
+    <div class="split">
+      <div class="node">
+        <div class="node-header">
+          <span class="node-name">get podsCard()</span>
+          <span class="node-line">line 868</span>
+          <span class="node-type type-getter">Getter</span>
+        </div>
+        <div class="node-desc">
+          Reads <code>_summaries.pods</code> at line 877. If count > 0 or pods exist, returns a card config with <code>summaryData</code> as a prop.
+        </div>
+        <div class="node-data">
+          <span class="data-tag">summaryData</span>
+          <span class="data-tag">showScaling</span>
+          <span class="data-tag">resources (pods)</span>
+        </div>
+      </div>
+
+      <div class="node">
+        <div class="node-header">
+          <span class="node-name">get cards()</span>
+          <span class="node-line">line 916</span>
+          <span class="node-type type-getter">Getter</span>
+        </div>
+        <div class="node-desc">
+          Aggregates <code>podsCard</code>, <code>jobsCard</code>, and other cards into the array rendered on the workload detail view.
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow-down"><div class="shaft" style="height:10px"></div><div class="head"></div></div>
+
+    <div class="node">
+      <div class="node-header">
+        <span class="node-name">StatusCard</span>
+        <span class="node-line">Resource/Detail/Card/StatusCard/index.vue</span>
+        <span class="node-type type-component">Component</span>
+      </div>
+      <div class="node-desc">
+        Renders pod state gauges from <code>summaryData.summary[0].counts</code> (running, error, etc.) and displays the total count. Supports scale up/down controls for Deployments and StatefulSets.
+      </div>
+    </div>
+  </div>
+</div>

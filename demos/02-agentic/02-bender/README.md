@@ -1,4 +1,4 @@
-# Bender (local pipeline / workflow)
+# Bender Pipeline
 
 > **Agentic** demo in [AI Shared](../../../README.md).
 
@@ -16,21 +16,9 @@
 5. Restart a single stage without rerunning the whole pipeline.
 ```
 
-## What to look for
-
-- Fresh-context retries beat trying to salvage a bad run.
-- You can interrogate any prior run stage by stage.
-- Live browser and log views while a run is in flight.
-- Restarting one stage does not cost you the whole pipeline.
-
 ## Skills & files
 
 - [`bender-notes.md`](files/bender-notes.md)
-
-## Result
-
-- `media/bender-run.webm` - A live run with the browser / logs tools open (pending: my-browser-record-video)
-- `media/bender-interrogate.png` - Interrogating a past run (pending: browser.mjs screenshot)
 
 ## Notes
 

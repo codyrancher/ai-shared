@@ -1,4 +1,4 @@
-# Stale bot
+# Stale Bot
 
 > **Agentic** demo in [AI Shared](../../../README.md).
 
@@ -12,20 +12,9 @@
 /schedule daily at 08:00: Find open issues in rancher/dashboard with no activity in 90 days and no milestone or assignee. Post the standard stale warning. If an already-warned issue has been silent another 14 days, close it as stale with a short explanation and the stale label. Skip anything labeled keep or security.
 ```
 
-## What to look for
-
-- The entire bot is a handful of lines of plain language.
-- It has an escape hatch (keep / security) so it stays safe unattended.
-- The closed-issue count shows the compounding value over time.
-
 ## Skills & files
 
 - [`stale-bot.md`](files/stale-bot.md)
-
-## Result
-
-- `media/definition.png` - The simple scheduled definition (pending: browser.mjs screenshot)
-- `media/closed-count.png` - Issues closed to date (pending: browser.mjs screenshot)
 
 ## Notes
 

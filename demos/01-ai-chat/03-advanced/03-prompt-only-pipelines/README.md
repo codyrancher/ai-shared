@@ -1,4 +1,4 @@
-# Pipelines and workflows from prompts alone (zero code)
+# Prompt-Only Pipelines
 
 > **AI Chat > Advanced** demo in [AI Shared](../../../../README.md).
 
@@ -12,19 +12,9 @@
 Build me a review pipeline with no code, just orchestration. Stage 1: three agents each read the current diff for a different concern (correctness, accessibility, performance) and return findings as JSON. Stage 2: for each finding, spawn a skeptic agent that tries to refute it, and drop anything a majority refutes. Stage 3: synthesize the survivors into a single ranked review. Run it on the current branch and show me the survivors.
 ```
 
-## What to look for
-
-- Fan-out, adversarial verify, and synthesis all come from the prompt.
-- Refuted findings get dropped before they reach you.
-- No pipeline code exists, yet it runs like one.
-
 ## Skills & files
 
 - [`pipeline-prompt.md`](files/pipeline-prompt.md)
-
-## Result
-
-- `media/pipeline.png` - A prompt-defined review pipeline running (pending: browser.mjs screenshot)
 
 ## Notes
 

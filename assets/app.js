@@ -18,9 +18,10 @@
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
   function highlightPlaceholders(escaped) {
-    // escaped text: highlight [bracket] and <angle> placeholder tokens
+    // escaped text: highlight [bracket] context tokens (brackets stripped, so the
+    // inner text reads naturally, e.g. "the current selection") and <angle> tokens.
     return escaped
-      .replace(/\[[^\]]+\]/g, function (m) { return '<span class="ph">' + m + '</span>'; })
+      .replace(/\[[^\]]+\]/g, function (m) { return '<span class="ph">' + m.slice(1, -1) + '</span>'; })
       .replace(/&lt;[^&]*?&gt;/g, function (m) { return '<span class="ph">' + m + '</span>'; });
   }
   function el(html) {
@@ -133,8 +134,9 @@
         var im = x.match(/!\[([^\]]*)\]\(([^)\s]+)\)/);
         return { alt: im[1], src: im[2], type: /\.(mp4|webm|mov|m4v)$/i.test(im[2]) ? 'video' : 'image' };
       });
-      var linkMatch = resIdx >= 0 ? afterRes.match(/(?:^|[^!])\[[^\]]*\]\(([^)\s]+)\)/) : null;
-      var resultHref = linkMatch ? linkMatch[1] : null;
+      var linkMatch = resIdx >= 0 ? afterRes.match(/(?:^|[^!])\[([^\]]*)\]\(([^)\s]+)\)/) : null;
+      var resultHref = linkMatch ? linkMatch[2] : null;
+      var resultLabel = linkMatch ? linkMatch[1].replace(/`/g, '') : null;
 
       out.push({
         label: heads[i].title,
@@ -142,6 +144,7 @@
         text: code ? code[1].replace(/\s+$/, '') : '',
         screenshot: shot ? { alt: shot[1], src: shot[2] } : null,
         resultHref: resultHref,
+        resultLabel: resultLabel,
         resultMedia: resultMedia,
         files: files
       });
@@ -157,7 +160,7 @@
       var r = parseReadme(md);
       var prompts = parsePrompts(md);
       return Promise.all(prompts.map(function (pr) {
-        if (!pr.resultHref) return pr;
+        if (!pr.resultHref || !/\.(md|markdown)$/i.test(pr.resultHref)) return pr;
         return fetchText(demo.path + '/' + pr.resultHref).then(function (t) { if (t) pr.resultMd = t; return pr; }, function () { return pr; });
       })).then(function (prs) {
         return { title: r.title, why: r.why, lookFor: r.lookFor, skills: r.skills, links: r.links, media: r.media, prompts: prs };
@@ -295,6 +298,9 @@
   function PromptBox(prompt, idx, basePath) {
     var body = highlightPlaceholders(esc(prompt.text));
     var thumb = prompt.screenshot ? ScreenshotThumb(prompt.screenshot, basePath) : '';
+    var htmlHref = prompt.resultHref && /\.html?$/i.test(prompt.resultHref) ? prompt.resultHref : null;
+    var htmlUrl = htmlHref ? (/^(https?:|data:|\/)/.test(htmlHref) ? htmlHref : basePath + '/' + htmlHref) : null;
+    var htmlLabel = prompt.resultLabel || 'Result';
     return '' +
       '<div class="chat">' +
         (prompt.label ? '<div class="prompt-title">' + esc(prompt.label) + '</div>' : '') +
@@ -313,6 +319,13 @@
           ? '<div class="claude-reply"><div class="cr-head">' + SPARK + '<span class="who">Claude</span><span class="cr-tag">example result</span></div>' +
             '<div class="cr-body">' + renderMarkdown(prompt.resultMd, basePath) + '</div></div>'
           : '') +
+        (htmlUrl
+          ? '<div class="prompt-result"><div class="pr-label">Result</div>' +
+            '<button class="result-embed" data-html="' + esc(htmlUrl) + '" data-label="' + esc(htmlLabel) + '" title="Click to open">' +
+              '<span class="re-frame-wrap"><iframe class="re-frame" src="' + esc(htmlUrl) + '" sandbox="allow-same-origin" scrolling="no" tabindex="-1" aria-hidden="true"></iframe></span>' +
+              '<span class="re-overlay"><span class="re-label">🗺 ' + esc(htmlLabel) + '</span><span class="re-open">Open ↗</span></span>' +
+            '</button></div>'
+          : '') +
         (prompt.resultMedia && prompt.resultMedia.length
           ? '<div class="prompt-result"><div class="pr-label">Result</div>' +
             prompt.resultMedia.map(function (m) {
@@ -327,25 +340,6 @@
       '</div>';
   }
 
-  // ---- media --------------------------------------------------------------
-  function mediaCard(m, path) {
-    if (m.pending) {
-      return '<div class="media-card"><div class="placeholder">' +
-        '<div><div class="big">' + (m.type === 'video' ? '🎬' : '🖼️') + '</div>' +
-        '<div>Recording pending</div>' +
-        '<div class="fn">' + esc(path + '/' + m.src) + '</div>' +
-        (m.captureWith ? '<div class="cw">capture with ' + esc(m.captureWith) + '</div>' : '') +
-        '</div></div>' +
-        '<div class="cap">' + esc(m.caption || '') + '</div></div>';
-    }
-    var src = path + '/' + m.src;
-    var inner = m.type === 'video'
-      ? '<video controls preload="metadata" src="' + esc(src) + '"></video>'
-      : '<img loading="lazy" alt="' + esc(m.caption || '') + '" src="' + esc(src) + '" ' +
-        'onerror="this.closest(&quot;.media-card&quot;).classList.add(&quot;broken&quot;);this.remove();" />';
-    return '<div class="media-card">' + inner +
-      '<div class="cap">' + esc(m.caption || '') + '</div></div>';
-  }
 
   // ===== Component: ImageModal ============================================
   // A reusable pan + zoom lightbox. Mount once, then ImageModal.open(src, alt).
@@ -464,6 +458,39 @@
     return { mount: mount, open: open };
   })();
 
+  // ===== Component: HtmlModal =============================================
+  // Renders a generated HTML page (e.g. a data-flow diagram) in a sandboxed
+  // iframe inside a lightbox. Mount once, then HtmlModal.open(url, label).
+  var HtmlModal = (function () {
+    var root, titleEl, frameEl, openEl;
+    function open(url, label) {
+      titleEl.textContent = label || 'Preview';
+      openEl.href = url;
+      frameEl.src = url;
+      root.classList.add('show'); root.setAttribute('aria-hidden', 'false');
+    }
+    function close() { root.classList.remove('show'); root.setAttribute('aria-hidden', 'true'); frameEl.src = 'about:blank'; }
+    function mount() {
+      if (root) return;
+      root = el(
+        '<div class="html-modal" aria-hidden="true">' +
+          '<div class="hm-panel">' +
+            '<div class="hm-head"><span class="hm-title"></span><a class="hm-open" target="_blank" rel="noopener">Open in new tab ↗</a><button class="hm-close" aria-label="Close">✕</button></div>' +
+            '<div class="hm-body"><iframe class="hm-frame" sandbox="allow-same-origin" title="Preview"></iframe></div>' +
+          '</div>' +
+        '</div>'
+      );
+      document.body.appendChild(root);
+      titleEl = root.querySelector('.hm-title');
+      frameEl = root.querySelector('.hm-frame');
+      openEl = root.querySelector('.hm-open');
+      root.querySelector('.hm-close').addEventListener('click', close);
+      root.addEventListener('mousedown', function (e) { if (e.target === root) close(); });
+      window.addEventListener('keydown', function (e) { if (e.key === 'Escape' && root.classList.contains('show')) close(); });
+    }
+    return { mount: mount, open: open };
+  })();
+
   // ---- render a demo (copy comes from its prefetched markdown) -----------
   function renderDemo(entry) {
     var d = entry.demo, section = entry.section, group = entry.group;
@@ -492,12 +519,6 @@
       h += '<ul class="lookfor">' + c.lookFor.map(function (li) { return '<li>' + esc(li) + '</li>'; }).join('') + '</ul>';
     }
 
-    var media = c.media || [];
-    if (media.length) {
-      h += '<div class="section-h">Result</div>';
-      h += '<div class="media-grid">' + media.map(function (m) { return mediaCard(m, d.path); }).join('') + '</div>';
-    }
-
     h += '<div class="folder-link">Demo folder: <a target="_blank" rel="noopener" href="' + esc(treeUrl(d.path)) + '"><code>' + esc(d.path) + '</code></a> · <a target="_blank" rel="noopener" href="' + esc(blobUrl(d.path, 'README.md')) + '">README.md</a></div>';
 
     var content = document.getElementById('content');
@@ -519,6 +540,9 @@
     });
     Array.prototype.forEach.call(content.querySelectorAll('.cr-img'), function (img) {
       img.addEventListener('click', function () { ImageModal.open(img.getAttribute('data-full') || img.getAttribute('src'), img.getAttribute('alt') || ''); });
+    });
+    Array.prototype.forEach.call(content.querySelectorAll('.result-embed'), function (btn) {
+      btn.addEventListener('click', function () { HtmlModal.open(btn.getAttribute('data-html'), btn.getAttribute('data-label')); });
     });
   }
 
@@ -578,6 +602,7 @@
     });
     ImageModal.mount();
     FileModal.mount();
+    HtmlModal.mount();
     window.addEventListener('hashchange', route);
     document.getElementById('tree').innerHTML = '<div class="loading" style="padding:12px 16px">Loading…</div>';
     document.getElementById('content').innerHTML = '<p class="loading">Loading demos…</p>';

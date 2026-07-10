@@ -1,4 +1,4 @@
-# Reduce active domains, hand the agent a toolbelt
+# Toolbelts Over Domains
 
 > **AI Chat > Basics** demo in [AI Shared](../../../../README.md).
 
@@ -12,19 +12,9 @@
 Here is the toolbelt for this project: browser.mjs for screenshots and video, wait-for-sidecars before any browser or Rancher work, the insights curl for reporting missing tools, and the my-* skills for commits, PRs, and recordings. Whenever a task needs the browser, Rancher, or GitHub, reach for these instead of asking me to do it by hand. If a tool you need is missing, tell me and I will add it.
 ```
 
-## What to look for
-
-- The agent picks the right tool on its own instead of narrating manual steps.
-- Narrow scope keeps the context focused and the runs unattended.
-- Missing-tool feedback becomes a loop: it asks, you add, it uses.
-
 ## Skills & files
 
 - [`toolbelt-CLAUDE.md`](files/toolbelt-CLAUDE.md)
-
-## Result
-
-- `media/toolbelt.png` - A CLAUDE.md toolbelt section (pending: browser.mjs screenshot)
 
 ## Notes
 

@@ -1,4 +1,4 @@
-# An agent that loops on itself to resolve an issue
+# Self-Looping Agent
 
 > **AI Chat > Advanced** demo in [AI Shared](../../../../README.md).
 
@@ -12,20 +12,10 @@
 Work issue #<N> end to end and do not stop until it is green. Loop: reproduce it against the live Rancher and record a before video, find and apply the fix, verify the repro no longer happens and record an after video, run yarn lint and the relevant tests, and if anything fails go back and fix it. When it is all passing, commit on a branch named issue-<N> using the my-commit-create skill. Re-read your own diff and the issue before you call it done.
 ```
 
-## What to look for
-
-- A real done condition ("do not stop until it is green") keeps it iterating.
-- It verifies itself: before/after video, lint, tests, re-reading the diff.
-- Same shape as my-code-autofix, just fired by hand.
-
 ## Skills & files
 
 - `my-code-autofix`
 - `my-commit-create`
-
-## Result
-
-- `media/self-loop.webm` - The agent iterating to green (pending: my-browser-record-video)
 
 ## Notes
 

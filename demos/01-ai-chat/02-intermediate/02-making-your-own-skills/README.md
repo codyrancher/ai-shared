@@ -1,4 +1,4 @@
-# Making your own skills
+# Authoring Skills
 
 > **AI Chat > Intermediate** demo in [AI Shared](../../../../README.md).
 
@@ -14,21 +14,11 @@ I keep repeating this task: turn a GitHub issue thread into a tight reproduction
 
 **Result:** [example result](files/result.md)
 
-## What to look for
-
-- Frontmatter description is written as a trigger ("use when..."), so discovery works.
-- The body is a short playbook, not prose.
-- It reads like the existing my-* skills, so the team recognizes the shape.
-
 ## Skills & files
 
 - `my-commit-create`
 - `my-pr-create`
 - [`example-skill/SKILL.md`](files/example-skill/SKILL.md)
-
-## Result
-
-- `media/skill.png` - A generated SKILL.md (pending: browser.mjs screenshot)
 
 ## Notes
 

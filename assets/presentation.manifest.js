@@ -22,11 +22,10 @@ window.PRESENTATION = {
   sections: [
     { id: "ai-chat", title: "AI Chat", blurb: "Interactive, conversational use of the agent. Demonstrated live in my Claude harness project.", groups: [
       { id: "basics", title: "Basics", blurb: "Basic in the sense that many people are already using variations of these, not that they are low value. Nice to run these inside a container or VM so you can let the agent work without constant supervision.", demos: [
-        "demos/01-ai-chat/01-basics/01-screenshot-prompting",
-        "demos/01-ai-chat/01-basics/02-codebase-query-report",
-        "demos/01-ai-chat/01-basics/03-why-was-it-implemented",
-        "demos/01-ai-chat/01-basics/04-behavior-environment",
-        "demos/01-ai-chat/01-basics/05-reduce-domains-more-tools"
+        "demos/01-ai-chat/01-basics/01-codebase-query-report",
+        "demos/01-ai-chat/01-basics/02-screenshot-prompting",
+        "demos/01-ai-chat/01-basics/03-behavior-environment",
+        "demos/01-ai-chat/01-basics/04-reduce-domains-more-tools"
       ] },
       { id: "intermediate", title: "Intermediate", blurb: "Package repeated work into skills and drive the browser from the CLI.", demos: [
         "demos/01-ai-chat/02-intermediate/01-provisioning-resources-infra",

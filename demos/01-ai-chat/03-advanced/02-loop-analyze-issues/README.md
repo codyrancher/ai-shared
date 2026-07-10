@@ -1,4 +1,4 @@
-# /loop over the whole issue backlog
+# Backlog Analysis
 
 > **AI Chat > Advanced** demo in [AI Shared](../../../../README.md).
 
@@ -14,19 +14,9 @@
 
 **Result:** [example result](files/result.md)
 
-## What to look for
-
-- Fresh context each iteration keeps late batches as sharp as the first.
-- Results accumulate in a file instead of living in one giant context.
-- Output is directly useful: dedupe candidates and where to focus.
-
 ## Skills & files
 
 - [`issues-report.sample.md`](files/issues-report.sample.md)
-
-## Result
-
-- `media/issues-report.png` - The accumulated hotspots + clusters report (pending: browser.mjs screenshot)
 
 ## Notes
 

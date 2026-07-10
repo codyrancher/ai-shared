@@ -1,4 +1,4 @@
-# Screenshots, videos, and browser control from the CLI
+# Browser Control
 
 > **AI Chat > Intermediate** demo in [AI Shared](../../../../README.md).
 
@@ -20,22 +20,11 @@ Reproduce issue #<N> against the live Rancher and record a before video. Use the
 Take a labeled before/after comparison screenshot of the affected page with my-browser-screenshot-comparison, master versus this branch, and draw a red box around the element that changed.
 ```
 
-## What to look for
-
-- One clean recording, no agent-thinking dead air (it scripts first, records second).
-- The comparison screenshot highlights exactly what changed.
-- Screenshots keep enough surrounding context to be reproducible.
-
 ## Skills & files
 
 - `my-browser-record-video`
 - `my-browser-screenshot-comparison`
 - `my-video-censor-ip`
-
-## Result
-
-- `media/repro.webm` - A live-recorded reproduction (pending: my-browser-record-video)
-- `media/comparison.png` - Master vs branch, changed element boxed (pending: my-browser-screenshot-comparison)
 
 ## Notes
 

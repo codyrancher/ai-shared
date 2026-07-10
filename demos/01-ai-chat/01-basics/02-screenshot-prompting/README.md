@@ -1,4 +1,4 @@
-# Prompting with screenshots
+# Screenshot Prompting
 
 > **AI Chat > Basics** demo in [AI Shared](../../../../README.md).
 
@@ -6,13 +6,15 @@
 
 ## Quick text sharing
 
-**Why:** Saves the tedium of selecting, copying, and reformatting a stack trace or log. The picture carries the text for you.
+**Why:** Saves the tedium of selecting, copying, and reformatting an error or stack trace. The picture carries the text for you.
 
 ```
-This is the failure from our CI run. Read the error and the stack frames in the screenshot, locate the responsible code in this repo, and explain the root cause. Link the files and lines you reference.
+Can you fix this compiler error?
 ```
 
-![A screenshot pasted straight into the prompt (click to pan / zoom)](media/example-screenshot.png)
+![A compiler error screenshot pasted straight into the prompt (click to pan / zoom)](media/compiler-error.png)
+
+**Result:** [example result](files/compiler-error-fix.md)
 
 ## Spatial awareness
 
@@ -23,16 +25,6 @@ The control I circled in red overlaps the search box on narrow viewports. Using 
 ```
 
 ![A UI screenshot you annotate and paste (click to pan / zoom)](media/example-ui.png)
-
-## What to look for
-
-- The agent transcribes and acts on text straight from the image, no paste needed.
-- It uses position ("overlaps", "to the right of", "below the fold") to find the right component.
-- Annotating the screenshot (a red circle) is enough to disambiguate the target.
-
-## Result
-
-- `media/screenshot-prompting.webm` - Pasting a screenshot and getting a located answer (pending: my-browser-record-video)
 
 ## Notes
 
