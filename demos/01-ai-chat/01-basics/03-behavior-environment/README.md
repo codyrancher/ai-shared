@@ -6,11 +6,22 @@
 
 ## Shape behavior
 
-**Why:** Never type "run lint first" or "no em dashes" again. Set it once and every reply obeys.
+**Why:** Have the agent respect a style you prefer, or provide instructions to avoid repeating yourself.
+
+**Files:** [CLAUDE.md](files/CLAUDE.md)
 
 ```
-Add two rules to CLAUDE.md: never use em dashes in any output, and always run yarn lint before you tell me a change is done. Then show me the diff.
+Create a commit message for the staged changes
 ```
+
+**Result:** [example result](files/commit-message.md)
+
+## Environmental Awareness
+
+**Why:** Inform your agent about all the cli tools, containers, browsers etc. available for its use. The more tools it has the more it can do for you, you can even make it aware of custom tools you create. This is highly personal to the workspace you design for the agent. You may also realize that you can have multiple claude.md files depending on where the agent runs.
+
+
+**Files:** [CLAUDE.md](files/environment-CLAUDE.md)
 
 ## Notes
 

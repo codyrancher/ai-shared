@@ -245,6 +245,25 @@
     s = s.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
     return s;
   }
+  // Build a (possibly nested) <ul> from list items tagged with their leading-space
+  // indent, so sub-bullets nest instead of flattening to one level.
+  function renderList(items) {
+    var html = '', stack = [];
+    for (var k = 0; k < items.length; k++) {
+      var it = items[k];
+      if (stack.length === 0) { stack.push(it.indent); html += '<ul><li>' + mdInline(it.text); continue; }
+      var top = stack[stack.length - 1];
+      if (it.indent > top) { stack.push(it.indent); html += '<ul><li>' + mdInline(it.text); }
+      else if (it.indent === top) { html += '</li><li>' + mdInline(it.text); }
+      else {
+        while (stack.length > 1 && it.indent < stack[stack.length - 1]) { html += '</li></ul>'; stack.pop(); }
+        html += '</li><li>' + mdInline(it.text);
+        stack[stack.length - 1] = it.indent;
+      }
+    }
+    while (stack.length > 0) { html += '</li></ul>'; stack.pop(); }
+    return html;
+  }
   function renderMarkdown(md, basePath) {
     mdBase = basePath || '';
     var lines = String(md).replace(/\r/g, '').split('\n'), out = '', i = 0;
@@ -267,7 +286,15 @@
       var hm = line.match(/^(#{1,6})\s+(.+)$/);
       if (hm) { var lvl = Math.min(6, hm[1].length + 2); out += '<h' + lvl + '>' + mdInline(hm[2].trim()) + '</h' + lvl + '>'; i++; continue; }
       if (/^>\s?/.test(line)) { var qb = []; while (i < lines.length && /^>\s?/.test(lines[i])) { qb.push(lines[i].replace(/^>\s?/, '')); i++; } out += '<blockquote>' + mdInline(qb.join(' ')) + '</blockquote>'; continue; }
-      if (/^\s*[-*+]\s+/.test(line)) { var ul = []; while (i < lines.length && /^\s*[-*+]\s+/.test(lines[i])) { ul.push(lines[i].replace(/^\s*[-*+]\s+/, '')); i++; } out += '<ul>' + ul.map(function (t) { return '<li>' + mdInline(t) + '</li>'; }).join('') + '</ul>'; continue; }
+      if (/^\s*[-*+]\s+/.test(line)) {
+        var uli = [];
+        while (i < lines.length && /^\s*[-*+]\s+/.test(lines[i])) {
+          var um = lines[i].match(/^(\s*)[-*+]\s+(.*)$/);
+          uli.push({ indent: um[1].replace(/\t/g, '    ').length, text: um[2] });
+          i++;
+        }
+        out += renderList(uli); continue;
+      }
       if (/^\s*\d+\.\s+/.test(line)) { var ol = []; while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) { ol.push(lines[i].replace(/^\s*\d+\.\s+/, '')); i++; } out += '<ol>' + ol.map(function (t) { return '<li>' + mdInline(t) + '</li>'; }).join('') + '</ol>'; continue; }
       if (/^\s*$/.test(line)) { i++; continue; }
       var para = [];
@@ -306,15 +333,17 @@
         (prompt.label ? '<div class="prompt-title">' + esc(prompt.label) + '</div>' : '') +
         (prompt.why ? '<div class="prompt-why">' + esc(prompt.why) + '</div>' : '') +
         (prompt.files && prompt.files.length ? '<div class="prompt-files">' + prompt.files.map(function (f) { return fileChip(basePath, f.label, f.href); }).join('') + '</div>' : '') +
-        '<div class="claude-box">' +
-          '<div class="cb-head">' + SPARK +
-            '<span class="who">You</span>' +
-            '<span class="spacer"></span>' +
-            '<button class="copy" data-i="' + idx + '">' + COPY + ' Copy</button>' +
-          '</div>' +
-          '<div class="cb-body">' + thumb + '<div class="cb-text">' + body + '</div></div>' +
-          '<div class="cb-foot"><span class="hint">Paste into Claude Code in the harness project</span></div>' +
-        '</div>' +
+        (prompt.text
+          ? '<div class="claude-box">' +
+              '<div class="cb-head">' + SPARK +
+                '<span class="who">You</span>' +
+                '<span class="spacer"></span>' +
+                '<button class="copy" data-i="' + idx + '">' + COPY + ' Copy</button>' +
+              '</div>' +
+              '<div class="cb-body">' + thumb + '<div class="cb-text">' + body + '</div></div>' +
+              '<div class="cb-foot"><span class="hint">Paste into Claude Code in the harness project</span></div>' +
+            '</div>'
+          : '') +
         (prompt.resultMd
           ? '<div class="claude-reply"><div class="cr-head">' + SPARK + '<span class="who">Claude</span><span class="cr-tag">example result</span></div>' +
             '<div class="cr-body">' + renderMarkdown(prompt.resultMd, basePath) + '</div></div>'
