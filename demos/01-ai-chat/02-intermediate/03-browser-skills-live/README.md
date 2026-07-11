@@ -53,8 +53,12 @@ Find all of the changes that we've made in this branch and use /my-browser-scree
 **Files:** [/my-browser-record-video](files/my-browser-record-video.md) [browser.mjs](files/browser.mjs) [record-template.mjs](files/record-template.mjs) [overlay.mjs](files/overlay.mjs)
 
 ```
-Reproduce issue #[N] against the live Rancher, then record the repro as one clean video.
+Can you reproduce https://github.com/rancher/dashboard/issues/15249? Create a list of steps/scripts to reproduce the issue and then /my-browser-record-video.
 ```
+
+**Result:**
+[example result](files/repro-15249.md)
+![The reproduction of rancher/dashboard#15249, recorded end to end](media/repro-15249.webm)
 
 ## Skills & files
 

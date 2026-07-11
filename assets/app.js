@@ -730,8 +730,6 @@
   // ---- boot ---------------------------------------------------------------
   function boot() {
     document.getElementById('repoLink').href = REPO;
-    document.getElementById('statusRepo').href = REPO;
-    document.getElementById('statusCount').textContent = '✳ ' + FLAT.length + ' demos';
     document.getElementById('hamburger').addEventListener('click', function () {
       document.body.classList.toggle('nav-open');
     });
