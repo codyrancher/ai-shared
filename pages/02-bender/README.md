@@ -1,18 +1,14 @@
 # Bender Pipeline
 
-Retry on fresh context instead of babysitting one long run, and reuse what each run produces. Fresh-context retries and single-stage restarts save you from nursing a poisoned run all the way to the end.
+A new tool to provide a better way to experiment and iterate on agentic workflows/pipelines.
 
-## Walkthrough
+## Aspiration
 
-1. The motivation: solve issues e2e, and harvest reusable prompts/skills for the team.
-2. Iterate and retry prompts on fresh context instead of fighting a poisoned one.
-3. The interrogation tools on a pre-existing run (inspect inputs, outputs, and state per stage).
-4. Start a run and open a live tool: the browser view or the streaming logs.
-5. Restart a single stage without rerunning the whole pipeline.
+- We're attempting to resolve issues e2e without human intervention up until pr review.
+- We'd like to automate resolving a number of a simpler issues.
+- Hopefully it will yield `prompts` and `skills` that the team can use in their daily workflows.
 
-See [`bender-notes.md`](files/bender-notes.md) for the stage list and the interrogation/live tools to point at during the demo.
 
-## Notes
+## Demo
 
-- The reusable-prompts/skills output is the compounding payoff: every issue Bender works leaves behind a prompt or skill the team can run by hand next time.
-- Fresh-context retries are the core habit this pipeline is built around. The interrogation and restart tools exist to make that cheap.
+[Here](https://100.90.154.26:4444/)

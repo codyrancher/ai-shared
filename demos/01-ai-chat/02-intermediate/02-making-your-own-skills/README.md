@@ -2,27 +2,34 @@
 
 > **AI Chat > Intermediate** demo in [AI Shared](../../../../README.md).
 
-**Why:** Stop re-explaining a repeated task; capture it once so you and the team trigger it with one word.
+**Why:** Stop repeating yourself, improve consistency and provide more tools to your agent
 
-## Codify a repeated task
+## Creating skills
 
-**Why:** Turns a paragraph you keep retyping into a one-word command the whole team shares.
+**Why:** Turn the session you just finished into a one-word command, so nobody has to rediscover the same steps.
+
+**Files:** [/my-browser-screenshot](files/my-browser-screenshot-v1.md)
 
 ```
-I keep repeating this task: turn a GitHub issue thread into a tight reproduction plus a proposed fix. Turn it into a reusable skill. Create .claude/skills/summarize-issue/SKILL.md with YAML frontmatter (name, and a description that says when to use it) and a concise step-by-step playbook. Match the voice and structure of my existing my-* skills.
+Can you summarize this conversation, I want to generalize it and create a skill named `/my-browser-screenshot`
 ```
 
-**Result:** [example result](files/result.md)
+**Result:** [example result](files/create-skill-result.md)
 
-## Skills & files
+## Updating skills
 
-- `my-commit-create`
-- `my-pr-create`
-- [`example-skill/SKILL.md`](files/example-skill/SKILL.md)
+**Why:** Fold the friction from a session back into the skill, so the same back and forth never happens twice.
+
+**Files:** [/my-browser-screenshot (updated)](files/my-browser-screenshot-v2.md)
+
+```
+We had to do a lot of back and forth to get the screenshots to include the highlighting. Can you update the /my-browser-screenshot skill so we can avoid the back and forth in the future?
+```
+
+**Result:** [example result](files/update-skill-result.md)
 
 ## Notes
 
 - The frontmatter `description` is what the agent matches on to auto-invoke the skill. Write it as a trigger: "Use when...". A vague description means the skill never fires.
 - Point the agent at an existing `my-*` skill as a style reference so the new one fits the house style.
-- Skills can ship helper scripts alongside `SKILL.md` (see `my-browser-record-video`'s `.mjs` files). Ask for those too when the task has a scripted step.
-- See [`files/example-skill/SKILL.md`](./files/example-skill/SKILL.md) for a representative result.
+- A skill is not done the first time it works. Every session that costs you a round of back and forth is a gotcha the skill should have known, so send it straight back into the file.

@@ -1,6 +1,6 @@
 # Browser Control
 
-> **AI Chat > Intermediate** demo in [AI Shared](../../../../README.md).
+> **AI Chat > Advanced** demo in [AI Shared](../../../../README.md).
 
 **Why:** Turn "reproduce this and film it" into one instruction, and batch it across the backlog while you work on something else.
 

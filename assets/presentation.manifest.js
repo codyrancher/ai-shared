@@ -29,13 +29,13 @@ window.PRESENTATION = {
       ] },
       { id: "intermediate", title: "Intermediate", blurb: "Package repeated work into skills and drive the browser from the CLI.", demos: [
         "demos/01-ai-chat/02-intermediate/01-provisioning-resources-infra",
-        "demos/01-ai-chat/02-intermediate/02-making-your-own-skills",
-        "demos/01-ai-chat/02-intermediate/03-browser-skills-live"
+        "demos/01-ai-chat/02-intermediate/02-making-your-own-skills"
       ] },
       { id: "advanced", title: "Advanced", blurb: "Let the agent loop on itself, analyze the whole backlog, and run multi-stage pipelines from prompts alone.", demos: [
-        "demos/01-ai-chat/03-advanced/01-agent-loop-resolve-issue",
-        "demos/01-ai-chat/03-advanced/02-loop-analyze-issues",
-        "demos/01-ai-chat/03-advanced/03-prompt-only-pipelines"
+        "demos/01-ai-chat/03-advanced/01-browser-skills-live",
+        "demos/01-ai-chat/03-advanced/02-agent-loop-resolve-issue",
+        "demos/01-ai-chat/03-advanced/03-loop-analyze-issues",
+        "demos/01-ai-chat/03-advanced/04-prompt-only-pipelines"
       ] }
     ] },
     { id: "agentic", title: "Agentic", blurb: "Unattended agents on a schedule, and a local pipeline for solving issues end to end.", groups: [
