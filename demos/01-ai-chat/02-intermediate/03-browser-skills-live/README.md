@@ -8,29 +8,49 @@
 
 **Why:** Grab the current state of a page without leaving the terminal or wiring up any tooling.
 
-```
-Take a screenshot of [the cluster management page] on the live Rancher and save it to disk.
-```
-
-## Verify your change visually
-
-**Why:** Confirm a fix actually works in the real UI instead of trusting that the diff and the tests look right.
+**Files:** [browser.mjs](files/browser.mjs)
 
 ```
-Verify [my change] by driving the affected page on the live Rancher and taking a screenshot. Confirm the new behavior shows up, not just that the tests pass.
+Take a screenshot of a statefulset list and detail page.
+- Highlight the create button on the list page
+- Name them stateful-list, stateful-detail.
 ```
+
+**Result:**
+[example result](files/statefulset-screenshots.md)
+![The StatefulSet list page with the Create button highlighted](media/stateful-list.png)
+![The StatefulSet detail page for web, with its three running pods](media/stateful-detail.png)
+
+## Quick Comparisons for Review
+
+**Why:** Hand reviewers a labeled before/after of every visual change, instead of making them check out the branch and click through it themselves.
+
+**Files:** [/my-browser-screenshot-comparison](files/my-browser-screenshot-comparison.md) [my-browser-screenshot-comparison.mjs](files/my-browser-screenshot-comparison.mjs) [browser.mjs](files/browser.mjs)
+
+```
+Find all of the changes that we've made in this branch and use /my-browser-screenshot-comparison to take comparison screenshots of each
+```
+
+**Result:** [Comparison screenshots posted on rancher/dashboard#17178](https://github.com/rancher/dashboard/pull/17178#issuecomment-4380619058)
 
 ## Record a video
 
 **Why:** Capture a short screen recording of a flow, hands-free and in one clean take.
 
+**Files:** [/my-browser-record-video](files/my-browser-record-video.md) [browser.mjs](files/browser.mjs) [record-template.mjs](files/record-template.mjs) [overlay.mjs](files/overlay.mjs)
+
 ```
-Record a short video of [the flow I describe] on the live Rancher using the my-browser-record-video skill. Iterate to find the exact click sequence first, then play it back so the recording is one clean take.
+/my-browser-record-video of the admin user logging into https://ai-presentation-rancher/dashboard, navigating to the auth page and creating a new standard user.
 ```
+
+**Result:**
+![The admin logging in and creating a new standard user](media/create-standard-user.webm)
 
 ## Reproduce an issue
 
-**Why:** Turn a vague bug report into a verified, filmed repro the next person can just watch.
+**Why:** Verify a bug report with a recorded video as an artifact to help the reproduction process.
+
+**Files:** [/my-browser-record-video](files/my-browser-record-video.md) [browser.mjs](files/browser.mjs) [record-template.mjs](files/record-template.mjs) [overlay.mjs](files/overlay.mjs)
 
 ```
 Reproduce issue #[N] against the live Rancher, then record the repro as one clean video.

@@ -167,7 +167,8 @@
       var r = parseReadme(md);
       var prompts = parsePrompts(md);
       return Promise.all(prompts.map(function (pr) {
-        if (!pr.resultHref || !/\.(md|markdown)$/i.test(pr.resultHref)) return pr;
+        // Only a local markdown result is fetched and rendered as a Claude reply.
+        if (!pr.resultHref || /^https?:/i.test(pr.resultHref) || !/\.(md|markdown)$/i.test(pr.resultHref)) return pr;
         return fetchText(demo.path + '/' + pr.resultHref).then(function (t) { if (t) pr.resultMd = t; return pr; }, function () { return pr; });
       })).then(function (prs) {
         return { title: r.title, why: r.why, lookFor: r.lookFor, skills: r.skills, links: r.links, media: r.media, prompts: prs };
@@ -336,6 +337,28 @@
     var hOff = headingOffset == null ? 2 : headingOffset;
     var lines = String(md).replace(/\r/g, '').split('\n'), out = '', i = 0;
     var esc = function (t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+
+    // YAML frontmatter (SKILL.md and friends). Render name/description as a header
+    // block instead of letting the `---` fences collapse into a run-on paragraph.
+    if (lines[0] === '---') {
+      var fmEnd = -1;
+      for (var f = 1; f < lines.length; f++) { if (lines[f] === '---') { fmEnd = f; break; } }
+      if (fmEnd > 0) {
+        var meta = {};
+        for (var g = 1; g < fmEnd; g++) {
+          var kv = lines[g].match(/^([A-Za-z_-]+):\s*(.*)$/);
+          if (kv) meta[kv[1].toLowerCase()] = kv[2].trim();
+        }
+        if (meta.name || meta.description) {
+          out += '<div class="md-front">' +
+            (meta.name ? '<div class="mf-name">' + mdInline(meta.name) + '</div>' : '') +
+            (meta.description ? '<div class="mf-desc">' + mdInline(meta.description) + '</div>' : '') +
+            '</div>';
+        }
+        i = fmEnd + 1;
+      }
+    }
+
     while (i < lines.length) {
       var line = lines[i];
       if (/^```/.test(line)) {
@@ -400,9 +423,14 @@
   function PromptBox(prompt, idx, basePath) {
     var body = highlightPlaceholders(esc(prompt.text));
     var thumb = prompt.screenshot ? ScreenshotThumb(prompt.screenshot, basePath) : '';
-    var htmlHref = prompt.resultHref && /\.html?$/i.test(prompt.resultHref) ? prompt.resultHref : null;
-    var htmlUrl = htmlHref ? (/^(https?:|data:|\/)/.test(htmlHref) ? htmlHref : basePath + '/' + htmlHref) : null;
+    // A result link is either a local .html page (embedded preview modal) or an
+    // external URL (rendered as a link out, e.g. to a PR comment).
+    var rHref = prompt.resultHref;
+    var rExternal = !!rHref && /^https?:/i.test(rHref);
+    var htmlHref = (rHref && !rExternal && /\.html?$/i.test(rHref)) ? rHref : null;
+    var htmlUrl = htmlHref ? (/^(data:|\/)/.test(htmlHref) ? htmlHref : basePath + '/' + htmlHref) : null;
     var htmlLabel = prompt.resultLabel || 'Result';
+    var extUrl = rExternal ? rHref : null;
     return '' +
       '<div class="chat">' +
         (prompt.label ? '<div class="prompt-title">' + esc(prompt.label) + '</div>' : '') +
@@ -416,7 +444,6 @@
                 '<button class="copy" data-i="' + idx + '">' + COPY + ' Copy</button>' +
               '</div>' +
               '<div class="cb-body">' + thumb + '<div class="cb-text">' + body + '</div></div>' +
-              '<div class="cb-foot"><span class="hint">Paste into Claude Code in the harness project</span></div>' +
             '</div>'
           : '') +
         (prompt.resultMd
@@ -429,6 +456,13 @@
               '<span class="re-frame-wrap"><iframe class="re-frame" src="' + esc(htmlUrl) + '" sandbox="allow-same-origin" scrolling="no" tabindex="-1" aria-hidden="true"></iframe></span>' +
               '<span class="re-overlay"><span class="re-label">🗺 ' + esc(htmlLabel) + '</span><span class="re-open">Open ↗</span></span>' +
             '</button></div>'
+          : '') +
+        (extUrl
+          ? '<div class="prompt-result"><div class="pr-label">Result</div>' +
+            '<a class="result-link" href="' + esc(extUrl) + '" target="_blank" rel="noopener">' +
+              '<span class="rl-label">' + esc(htmlLabel) + '</span>' +
+              '<span class="rl-go">Open ↗</span>' +
+            '</a></div>'
           : '') +
         (prompt.resultMedia && prompt.resultMedia.length
           ? '<div class="prompt-result"><div class="pr-label">Result</div>' +
