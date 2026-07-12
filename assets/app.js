@@ -122,7 +122,11 @@
       var afterRes = resIdx >= 0 ? body.slice(resIdx) : '';
 
       var code = beforeRes.match(/```[^\n]*\n([\s\S]*?)\n?```/);
-      var shot = beforeRes.match(/!\[([^\]]*)\]\(([^)\s]+)\)/);
+      // Every image before **Result:** is an input screenshot pasted with the prompt.
+      var shots = (beforeRes.match(/!\[[^\]]*\]\([^)\s]+\)/g) || []).map(function (x) {
+        var im = x.match(/!\[([^\]]*)\]\(([^)\s]+)\)/);
+        return { alt: im[1], src: im[2] };
+      });
       var filesLine = beforeRes.match(/^\*\*Files:\*\*[ \t]*(.+)$/im);
       var files = [];
       if (filesLine) {
@@ -142,7 +146,7 @@
         label: heads[i].title,
         why: ((beforeRes.match(/^\*\*Why:\*\*[ \t]*(.+)$/m) || [])[1] || '').trim(),
         text: code ? code[1].replace(/\s+$/, '') : '',
-        screenshot: shot ? { alt: shot[1], src: shot[2] } : null,
+        screenshots: shots,
         resultHref: resultHref,
         resultLabel: resultLabel,
         resultMedia: resultMedia,
@@ -313,6 +317,26 @@
   // richer blocks (hero, card, generated section cards) rather than plain prose.
   function renderContainer(name, inner, basePath, hOff) {
     if (name === 'sections') return sectionsBlock();
+    // `::: agenda` -> a grid of numbered boxes, one per list item. An item may be
+    // just a title, or `**Title** - description` to show a sub-line under it.
+    if (name === 'agenda') {
+      var items = [];
+      inner.split('\n').forEach(function (l) {
+        var m = l.match(/^\s*(?:\d+[.)]|[-*+])\s+(.*\S)\s*$/);
+        if (m) items.push(m[1]);
+      });
+      return '<div class="agenda-grid">' + items.map(function (t, i) {
+        var tm = t.match(/^\*\*(.+?)\*\*\s*(?:[-–]\s*(.*))?$/);
+        var title = tm ? tm[1] : t;
+        var desc = (tm && tm[2]) ? tm[2] : '';
+        var n = i + 1;
+        return '<div class="ag-box">' +
+          '<div class="ag-num">' + (n < 10 ? '0' : '') + n + '</div>' +
+          '<div class="ag-title">' + mdInline(title) + '</div>' +
+          (desc ? '<div class="ag-desc">' + mdInline(desc) + '</div>' : '') +
+          '</div>';
+      }).join('') + '</div>';
+    }
     if (name === 'hero') {
       var kick = inner.match(/^\*\*(.+?)\*\*\s*$/m);
       var h1 = inner.match(/^#\s+(.+?)\s*$/m);
@@ -417,12 +441,14 @@
   // ===== Component: PromptBox ==============================================
   // Renders one prompt as a Claude-style chat box. Reusable:
   //   PromptBox(prompt, idx, basePath) -> html string
-  //   prompt: { label?, text, screenshot?: { src, alt } }
-  // When a screenshot is present, its thumbnail sits at the top of the box
-  // (in place of a "[paste a screenshot ...]" line in the text).
+  //   prompt: { label?, text, screenshots?: [{ src, alt }] }
+  // Input screenshots pasted with the prompt sit as thumbnails at the top of the box.
   function PromptBox(prompt, idx, basePath) {
     var body = highlightPlaceholders(esc(prompt.text));
-    var thumb = prompt.screenshot ? ScreenshotThumb(prompt.screenshot, basePath) : '';
+    var shots = prompt.screenshots || [];
+    var thumb = shots.length
+      ? '<div class="prompt-thumbs">' + shots.map(function (s) { return ScreenshotThumb(s, basePath); }).join('') + '</div>'
+      : '';
     // A result link is either a local .html page (embedded preview modal) or an
     // external URL (rendered as a link out, e.g. to a PR comment).
     var rHref = prompt.resultHref;
