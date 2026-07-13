@@ -8,7 +8,6 @@
   --editor: #1e1e1e;
   --editor-2: #232323;
   --titlebar: #3c3c3c;
-  --statusbar: #007acc;
   --border: #2b2b2b;
   --border-2: #3c3c3c;
 
@@ -56,7 +55,7 @@ a:hover { text-decoration: underline; }
 
 .app {
   display: grid;
-  grid-template-rows: 35px 1fr 22px;
+  grid-template-rows: 35px 1fr;
   height: 100vh;
   overflow: hidden;
 }
@@ -221,7 +220,7 @@ h1.demo-title { font-size: 30px; line-height: 1.15; margin: 0 0 14px; color: var
 }
 .claude-box .cb-head .copy:hover { color: var(--text); border-color: #55534d; background: #ffffff06; }
 .claude-box .cb-head .copy.done { color: var(--green); border-color: var(--green); }
-.claude-box .cb-body { padding: 14px 16px 4px; }
+.claude-box .cb-body { padding: 14px 16px; }
 .claude-box .cb-text {
   font-family: var(--mono); font-size: 13.5px; line-height: 1.65;
   color: #e7e3dd; white-space: pre-wrap; word-break: break-word;
@@ -229,6 +228,9 @@ h1.demo-title { font-size: 30px; line-height: 1.15; margin: 0 0 14px; color: var
 .claude-box .cb-body .ph { color: var(--claude-coral); font-style: italic; }
 
 /* Screenshot thumbnail at the top of a prompt box */
+/* Input screenshots pasted with the prompt. Several sit side by side. */
+.prompt-thumbs { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 14px; }
+.prompt-thumbs .prompt-thumb { margin: 0; flex: 1 1 260px; min-width: 0; }
 .prompt-thumb {
   display: block; position: relative; padding: 0; margin: 0 0 14px; border: 0;
   background: transparent; cursor: zoom-in; line-height: 0;
@@ -299,6 +301,14 @@ h1.demo-title { font-size: 30px; line-height: 1.15; margin: 0 0 14px; color: var
 .fm-raw { background: #1b1b1a; border: 1px solid var(--claude-border); border-radius: 8px; padding: 14px 16px; overflow-x: auto; margin: 12px 0; }
 .fm-raw code { font-family: var(--mono); font-size: 12.5px; color: #e7e3dd; line-height: 1.6; white-space: pre; }
 
+/* YAML frontmatter header (SKILL.md previews) */
+.md-front {
+  border: 1px solid var(--border-2); border-radius: 8px; padding: 10px 14px;
+  margin: 4px 0 16px; background: #ffffff06;
+}
+.mf-name { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--claude-coral); }
+.mf-desc { font-size: 13px; line-height: 1.55; color: var(--text-dim); margin-top: 5px; }
+
 /* Clickable preview of a generated HTML page (e.g. a data-flow diagram) */
 .result-embed {
   display: block; width: 100%; padding: 0; margin: 0; border: 1px solid var(--border-2);
@@ -314,6 +324,16 @@ h1.demo-title { font-size: 30px; line-height: 1.15; margin: 0 0 14px; color: var
 }
 .re-label { font-weight: 600; }
 .re-open { color: #fff; opacity: .9; flex: none; }
+
+/* External link result (e.g. a PR comment holding the output) */
+.result-link {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  border: 1px solid var(--border-2); border-radius: 8px; padding: 12px 14px;
+  background: var(--editor-2); text-decoration: none;
+}
+.result-link:hover { border-color: var(--claude-coral); }
+.rl-label { color: var(--cyan); font-size: 13px; line-height: 1.5; word-break: break-word; }
+.rl-go { color: var(--text-dim); font-size: 12px; flex: none; }
 
 /* HTML page lightbox */
 .html-modal { position: fixed; inset: 0; z-index: 120; display: none; background: #0b0b0be6; }
@@ -334,11 +354,6 @@ h1.demo-title { font-size: 30px; line-height: 1.15; margin: 0 0 14px; color: var
 .hm-close:hover { background: #ffffff24; }
 .hm-body { flex: 1; min-height: 0; background: #fff; }
 .hm-frame { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
-.claude-box .cb-foot {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 14px 12px;
-}
-.claude-box .cb-foot .hint { color: var(--text-dim); font-size: 12px; }
 
 /* Claude reply bubble (captured demo result rendered from markdown) */
 .claude-reply {
@@ -379,6 +394,16 @@ h1.demo-title { font-size: 30px; line-height: 1.15; margin: 0 0 14px; color: var
 .cr-body th { background: #ffffff08; color: var(--text); font-weight: 600; }
 .cr-body .cr-img { max-width: 100%; height: auto; display: block; margin: 12px 0; border: 1px solid var(--border-2); border-radius: 8px; cursor: zoom-in; }
 .cr-body .cr-img:hover { border-color: var(--claude-coral); }
+
+/* A full markdown page (anything under pages/). Reuses .cr-body for tables,
+   code, links, and images, but reads at page scale rather than reply scale. */
+.page-body { padding: 0; font-size: 15px; }
+.page-body > :first-child { margin-top: 0; }
+.page-body h1 { font-size: 30px; line-height: 1.15; margin: 0 0 14px; color: var(--text-bright); font-weight: 650; }
+.page-body h2 { font-size: 19px; margin: 30px 0 10px; color: var(--text-bright); font-weight: 650; }
+.page-body p { margin: 12px 0; line-height: 1.6; }
+.page-body ul, .page-body ol { margin: 12px 0; }
+.page-body li { margin: 6px 0; }
 
 /* Plain per-prompt result (e.g. screenshots) - not a chat bubble */
 .prompt-result { margin-top: 14px; }
@@ -462,6 +487,22 @@ ul.lookfor li::before {
 .ov-card h3 { margin: 0 0 12px; color: var(--text); font-size: 15px; }
 .ov-card ul { margin: 0; padding-left: 20px; }
 .ov-card li { line-height: 1.7; margin-bottom: 6px; color: #cfcfcf; }
+/* Agenda: a grid of numbered boxes (::: agenda) */
+.agenda-grid {
+  display: grid; gap: 16px; margin: 30px 0 0;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+.ag-box {
+  background: var(--editor-2); border: 1px solid var(--border-2);
+  border-radius: 10px; padding: 18px 20px;
+}
+.ag-num {
+  font-family: var(--mono); font-size: 12px; font-weight: 600;
+  letter-spacing: 1px; color: var(--claude-coral); margin-bottom: 10px;
+}
+.ag-title { font-size: 16px; font-weight: 650; line-height: 1.35; color: var(--text-bright); }
+.ag-desc { margin-top: 7px; font-size: 13px; line-height: 1.55; color: var(--text-dim); }
+
 .ov-sections { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 .ov-sec {
   background: var(--editor-2); border: 1px solid var(--border-2); border-radius: 12px;
@@ -472,15 +513,6 @@ ul.lookfor li::before {
 .ov-sec p { margin: 0; color: var(--text-dim); font-size: 13px; line-height: 1.6; }
 .ov-sec .count { margin-top: 10px; font-size: 12px; color: var(--text-dim); font-family: var(--mono); }
 
-/* ---- Status bar ---- */
-.statusbar {
-  background: var(--statusbar); color: #fff; font-size: 12px;
-  display: flex; align-items: center; gap: 16px; padding: 0 12px;
-}
-.statusbar .left, .statusbar .right { display: flex; align-items: center; gap: 14px; }
-.statusbar .right { margin-left: auto; }
-.statusbar a { color: #fff; }
-.statusbar .seg { display: flex; align-items: center; gap: 5px; }
 
 /* ---- Scrollbars ---- */
 ::-webkit-scrollbar { width: 12px; height: 12px; }
@@ -500,5 +532,6 @@ ul.lookfor li::before {
   .titlebar .hamburger { display: block; }
   .content { padding: 24px 18px 80px; }
   h1.demo-title { font-size: 24px; }
+  .page-body h1 { font-size: 24px; }
   .ov-hero h1 { font-size: 30px; }
 }

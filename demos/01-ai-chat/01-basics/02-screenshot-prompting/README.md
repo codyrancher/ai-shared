@@ -16,18 +16,25 @@ Can you fix this compiler error?
 
 **Result:** [example result](files/compiler-error-fix.md)
 
-## Spatial awareness
+## Visual Understanding
 
-**Why:** Faster than writing paragraphs about a layout bug. You point at the region and the agent sees where things sit.
+**Why:** The models may surprise you with how much they can derive from a screenshot
 
 ```
-The control I circled in red overlaps the search box on narrow viewports. Using the layout you can see in the screenshot, find the Vue component that renders this area and propose a CSS fix that keeps them from colliding below 768px.
+Review the screenshot and tell me the following:
+- What host was loaded?
+- How long from the first request to the response of the last request elapsed?
+- What vue component rendered the list page?
+- What's does the text read in the bottom left corner of the page that's a link?
+- Are there any console messages visible right now?
 ```
 
-![A UI screenshot you annotate and paste (click to pan / zoom)](media/example-ui.png)
+![A Rancher page with DevTools open on the Network panel (click to pan / zoom)](media/devtools-network.jpg)
+
+**Result:** [example result](files/screenshot-analysis.md)
 
 ## Notes
 
 - Paste images directly into Claude Code (drag/drop or clipboard). No need to transcribe text out of them first.
-- Annotate before pasting (a red circle, an arrow) when the screen has more than one candidate target.
-- Screenshots beat pasted text when layout matters: alignment, overlap, spacing, "which of these three".
+- It reads fine detail: the URL bar, the "Finish: 2.14 s" metric in the Network status bar, and the "About" link at the bottom of the sidebar.
+- Note answer 3. It says the Vue component is "not derivable from the screenshot alone" and separates what it can see from what it knows from the codebase. Asking several questions at once is a cheap way to find out where that line falls.
