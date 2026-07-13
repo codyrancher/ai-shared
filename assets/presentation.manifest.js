@@ -61,7 +61,8 @@ window.PRESENTATION = {
       ] },
       { id: "build-deploy", title: "Autonomous build & deploy", blurb: "Describe what you want; the agent creates the repo or branch, builds it, deploys it to a live cluster, verifies it, and registers it — the full lifecycle, unattended, one at a time, with status tracked on a Kubernetes resource.", demos: [
         "demos/02-agentic/05-build-deploy/01-feedback-console",
-        "demos/02-agentic/05-build-deploy/02-extension-console"
+        "demos/02-agentic/05-build-deploy/02-extension-console",
+        "demos/02-agentic/05-build-deploy/03-fix-vulnerability-console"
       ] }
     ] }
   ]

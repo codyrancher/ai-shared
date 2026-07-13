@@ -22,6 +22,8 @@
 
 ## Notes
 
+- The aspiration is to resolve issues end to end without human intervention up until PR review, starting with a number of the simpler issues.
 - The reusable-prompts/skills output is the compounding payoff: every issue Bender works leaves behind a prompt or skill the team can run by hand next time.
 - Fresh-context retries are the core habit this pipeline is built around; the interrogation and restart tools exist to make that cheap.
 - See [`files/bender-notes.md`](./files/bender-notes.md) for the stage list and the interrogation/live tools to point at during the demo.
+- Live instance to demo against: [https://100.90.154.26:4444/](https://100.90.154.26:4444/).
