@@ -1,6 +1,6 @@
 # Stale Bot
 
-> **Agentic** demo in [AI Shared](../../../README.md).
+> **Agentic > Scheduled repo bots** demo in [AI Shared](../../../../README.md).
 
 **Why:** Keep the backlog tidy on autopilot so no one has to babysit stale issues.
 

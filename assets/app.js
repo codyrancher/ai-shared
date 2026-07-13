@@ -359,10 +359,14 @@
           ? '<div class="prompt-result"><div class="pr-label">Result</div>' +
             prompt.resultMedia.map(function (m) {
               var src = /^(https?:|data:|\/)/.test(m.src) ? m.src : basePath + '/' + m.src;
+              var base = src.split('/').pop();
+              // Result images degrade to a labeled "pending capture" placeholder if the
+              // file isn't in media/ yet, instead of showing a broken-image icon.
               var inner = m.type === 'video'
                 ? '<video class="pr-video" controls preload="metadata" src="' + esc(src) + '"></video>'
-                : '<img class="cr-img" src="' + esc(src) + '" data-full="' + esc(src) + '" alt="' + esc(m.alt) + '" />';
-              return '<figure class="pr-shot">' + inner + (m.alt ? '<figcaption>' + esc(m.alt) + '</figcaption>' : '') + '</figure>';
+                : '<img class="cr-img" src="' + esc(src) + '" data-full="' + esc(src) + '" alt="' + esc(m.alt) + '" ' +
+                  'onerror="this.closest(&quot;.pr-shot&quot;).classList.add(&quot;pending&quot;)" />';
+              return '<figure class="pr-shot" data-file="' + esc(base) + '">' + inner + (m.alt ? '<figcaption>' + esc(m.alt) + '</figcaption>' : '') + '</figure>';
             }).join('') +
             '</div>'
           : '') +

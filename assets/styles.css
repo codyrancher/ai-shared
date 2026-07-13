@@ -388,6 +388,14 @@ h1.demo-title { font-size: 30px; line-height: 1.15; margin: 0 0 14px; color: var
 .pr-shot .cr-img:hover { border-color: var(--claude-coral); }
 .pr-shot .pr-video { max-width: 100%; width: 100%; display: block; border: 1px solid var(--border-2); border-radius: 8px; background: #000; }
 .pr-shot figcaption { font-size: 12px; color: var(--text-dim); margin-top: 7px; }
+.pr-shot.pending .cr-img { display: none; }
+.pr-shot.pending::before {
+  content: "⧗ screenshot pending — drop " attr(data-file) " into media/";
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  min-height: 120px; padding: 20px; box-sizing: border-box;
+  border: 1px dashed var(--border-2); border-radius: 8px;
+  color: var(--text-dim); font-family: var(--mono); font-size: 12px;
+}
 
 /* ---- Look-for list ---- */
 ul.lookfor { list-style: none; padding: 0; margin: 0; }

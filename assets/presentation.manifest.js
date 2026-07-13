@@ -37,10 +37,31 @@ window.PRESENTATION = {
         "demos/01-ai-chat/03-advanced/03-prompt-only-pipelines"
       ] }
     ] },
-    { id: "agentic", title: "Agentic", blurb: "Unattended agents on a schedule, and a local pipeline for solving issues end to end.", groups: [
-      { id: "agentic-showcases", title: null, blurb: null, demos: [
-        "demos/02-agentic/01-stale-bot",
-        "demos/02-agentic/02-bender"
+    { id: "agentic", title: "Agentic", blurb: "Agents that run on their own: scheduled bots that groom, triage, and test the repo; unattended loops that grind a goal to done; multi-agent orchestrations that check their own work; and AI-built tooling that turns manual processes into buttons and reports.", groups: [
+      { id: "scheduled-bots", title: "Scheduled repo bots", blurb: "Run on a schedule with no one watching — they read issues and PRs and post analysis, criteria, triage, or brand-new tests straight onto the tracker.", demos: [
+        "demos/02-agentic/01-scheduled-bots/01-stale-bot",
+        "demos/02-agentic/01-scheduled-bots/02-daily-issue-grooming",
+        "demos/02-agentic/01-scheduled-bots/03-issue-triage",
+        "demos/02-agentic/01-scheduled-bots/04-test-improver"
+      ] },
+      { id: "unattended-loops", title: "Unattended & looping agents", blurb: "One agent, one goal, running to completion — trigger, inspect, fix, repeat until it's genuinely done, guarded so it can't cheat the check.", demos: [
+        "demos/02-agentic/02-unattended-loops/01-compatibility-extension-test",
+        "demos/02-agentic/02-unattended-loops/02-eslint-migration",
+        "demos/02-agentic/02-unattended-loops/03-fix-dependabot"
+      ] },
+      { id: "orchestration", title: "Multi-agent orchestration", blurb: "Specialized agents pipelined together, every doer paired with a verifier that grades and gates — so the run converges instead of looping on bad output.", demos: [
+        "demos/02-agentic/03-orchestration/01-e2e-test-automation",
+        "demos/02-agentic/03-orchestration/02-ui-locales",
+        "demos/02-agentic/03-orchestration/03-bender"
+      ] },
+      { id: "ai-tooling", title: "AI-powered tooling", blurb: "AI that both builds and feeds the tool — consoles, dashboards, and reports where fetching, shaping, and rendering the data is a prompt, and extending it is a sentence.", demos: [
+        "demos/02-agentic/04-ai-tooling/01-release-captaincy",
+        "demos/02-agentic/04-ai-tooling/02-dependabot-alerts",
+        "demos/02-agentic/04-ai-tooling/03-reports"
+      ] },
+      { id: "build-deploy", title: "Autonomous build & deploy", blurb: "Describe what you want; the agent creates the repo or branch, builds it, deploys it to a live cluster, verifies it, and registers it — the full lifecycle, unattended, one at a time, with status tracked on a Kubernetes resource.", demos: [
+        "demos/02-agentic/05-build-deploy/01-feedback-console",
+        "demos/02-agentic/05-build-deploy/02-extension-console"
       ] }
     ] }
   ]

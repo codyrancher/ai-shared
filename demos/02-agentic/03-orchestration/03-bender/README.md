@@ -1,6 +1,6 @@
 # Bender Pipeline
 
-> **Agentic** demo in [AI Shared](../../../README.md).
+> **Agentic > Multi-agent orchestration** demo in [AI Shared](../../../../README.md).
 
 **Why:** Retry on fresh context instead of babysitting one long run, and reuse what each run produces.
 
