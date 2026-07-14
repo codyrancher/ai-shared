@@ -32,6 +32,8 @@ loop with an attempt cap that escalates to Human Review instead of spinning.
 
 **Result:** ![Multi-agent E2E automation flow: planner, plan verifier, plan fixer, spec writer, spec runner, spec verifier, spec fixer over a shared-memory branch](media/orchestration-flow.png)
 
+Live interactive diagram: [e2e-flow.13.48.147.135.sslip.io](https://e2e-flow.13.48.147.135.sslip.io/) — click any step for its details, or press *Start walkthrough* to step through all 15 stages and both retry loops.
+
 ## What to look for
 
 - Plan before execution. Phase 1 validates the test plan (selectors exist, coverage is real) before a single spec is written. Cheap to fix a bad plan; expensive to debug a bad spec built on one.
@@ -49,4 +51,4 @@ loop with an attempt cap that escalates to Human Review instead of spinning.
 - This is the multi-agent counterpart to the local **Bender** pipeline: same "solve it e2e, verify each stage" philosophy, run as a cloud orchestration instead of a local one.
 - The verify-and-grade step is the load-bearing idea. Without it a single agent will keep "fixing" toward a wrong target; the grader defines *done* and refuses to advance until it's met.
 - The two-phase split (plan, then spec) is the other big lever — it front-loads the cheap checks (do these selectors even exist?) before any expensive execution.
-- Screenshot to add: `media/orchestration-flow.png` (the pipeline diagram).
+- The interactive version of the diagram is live at [e2e-flow.13.48.147.135.sslip.io](https://e2e-flow.13.48.147.135.sslip.io/); `media/orchestration-flow.png` is a capture of it.
