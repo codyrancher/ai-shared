@@ -33,13 +33,12 @@ window.PRESENTATION = {
       ] },
       { id: "advanced", title: "Advanced", blurb: "Let the agent loop on itself, analyze the whole backlog, and run multi-stage pipelines from prompts alone.", demos: [
         "demos/01-ai-chat/03-advanced/01-browser-skills-live",
-        "demos/01-ai-chat/03-advanced/02-agent-loop-resolve-issue",
-        "demos/01-ai-chat/03-advanced/03-prompt-only-pipelines"
+        "demos/01-ai-chat/03-advanced/02-agent-loop-resolve-issue"
       ] }
     ] },
     { id: "agentic", title: "Agentic", blurb: "Agents that run on their own: scheduled bots that groom, triage, and test the repo; unattended loops that grind a goal to done; multi-agent orchestrations that check their own work; and AI-built tooling that turns manual processes into buttons and reports.", groups: [
       { id: "scheduled-bots", title: "Scheduled repo bots", blurb: "Run on a schedule with no one watching — they read issues and PRs and post analysis, criteria, triage, or brand-new tests straight onto the tracker.", demos: [
-        "demos/02-agentic/01-scheduled-bots/01-stale-bot",
+        "pages/02-agentic/01-scheduled-bots/01-stale-bot",
         "demos/02-agentic/01-scheduled-bots/02-daily-issue-grooming",
         "demos/02-agentic/01-scheduled-bots/03-issue-triage",
         "demos/02-agentic/01-scheduled-bots/04-test-improver"
@@ -52,7 +51,7 @@ window.PRESENTATION = {
       { id: "orchestration", title: "Multi-agent orchestration", blurb: "Specialized agents pipelined together, every doer paired with a verifier that grades and gates — so the run converges instead of looping on bad output.", demos: [
         "demos/02-agentic/03-orchestration/01-e2e-test-automation",
         "demos/02-agentic/03-orchestration/02-ui-locales",
-        "demos/02-agentic/03-orchestration/03-bender"
+        "pages/02-agentic/03-orchestration/03-bender"
       ] },
       { id: "ai-tooling", title: "AI-powered tooling", blurb: "AI that both builds and feeds the tool — consoles, dashboards, and reports where fetching, shaping, and rendering the data is a prompt, and extending it is a sentence.", demos: [
         "demos/02-agentic/04-ai-tooling/01-release-captaincy",
