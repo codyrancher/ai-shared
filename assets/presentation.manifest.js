@@ -20,6 +20,7 @@ window.PRESENTATION = {
   model: "Claude Opus 4.8",
   outline: "pages/outline",
   overview: "pages/overview",
+  levelSetting: "pages/level-setting",
   sections: [
     { id: "ai-chat", title: "AI Chat", blurb: "Interactive, conversational use of the agent. Demonstrated live in my Claude harness project.", groups: [
       { id: "basics", title: "Basics", blurb: "Basic in the sense that many people are already using variations of these, not that they are low value. Nice to run these inside a container or VM so you can let the agent work without constant supervision.", demos: [

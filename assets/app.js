@@ -191,6 +191,7 @@
   var TOP_PAGES = [];
   if (P.outline) TOP_PAGES.push({ id: 'outline', path: P.outline, nav: 'Agenda' });
   if (P.overview) TOP_PAGES.push({ id: 'overview', path: P.overview, nav: 'AI 1 on 1s' });
+  if (P.levelSetting) TOP_PAGES.push({ id: 'level-setting', path: P.levelSetting, nav: 'Level setting' });
   function topPageById(id) { for (var i = 0; i < TOP_PAGES.length; i++) if (TOP_PAGES[i].id === id) return TOP_PAGES[i]; return null; }
   var DEFAULT_ID = TOP_PAGES.length ? TOP_PAGES[0].id : (FLAT[0] && FLAT[0].demo.id);
 

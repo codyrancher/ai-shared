@@ -9,5 +9,11 @@ Practical ways to fold AI into a Rancher / Dashboard workflow
 
 - Everyone is using AI.
 - Most people have found small niches in their existing workflow to inject AI.
-- Some have not tried the current SOTA models (Claude Opus 4.8 / Fable, OpenAI GPT 5.5). If you have been disappointed with the results, it is worth trying one of them again.
+  - Writing commit and PR descriptions
+  - Searching the code
+  - Explaining the functionality of the code
+  - Provisioning resources
+- At the time there wasn't much overlap in how we used AI.
+- Some were disappointed in the results, specifically around code generation.
+- Most hadn't experimented outside of the tools that were provided by SUSE.
 :::
